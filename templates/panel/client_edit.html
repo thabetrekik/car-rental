@@ -1,0 +1,55 @@
+{% extends 'panel/admin_panel.html' %}
+
+{% block title %}Edit Client | Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+  .btn-ghost {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .btn-ghost:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header">
+    <div>
+      <h1><i class="fa-solid fa-user-pen"></i> Edit Client</h1>
+      <p>Update details for {{ client.last_name }} {{ client.first_name }}.</p>
+    </div>
+    <div class="header-pill">Clients</div>
+  </header>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <section class="panel-card">
+    {% include 'includes/client_form.html' with action_url=request.path button_label='Update Client' force_active=True %}
+    <div style="margin-top: 16px;">
+      <a class="btn-ghost" href="{% url 'client_page' %}">
+        <i class="fa-solid fa-arrow-left"></i> Back to clients
+      </a>
+    </div>
+  </section>
+{% endblock %}

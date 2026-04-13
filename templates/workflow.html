@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow | Car Rental</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-copy">
+                    <div class="brand-title">Car Rental</div>
+                </div>
+            </div>
+
+            <nav class="main-nav" aria-label="Primary">
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'cars' %}">Cars</a>
+                <a class="active" href="{% url 'workflow' %}">Workflow</a>
+                <a href="{% url 'reservation_history' %}">Reservations</a>
+            </nav>
+
+            <div class="topbar-actions">
+                <button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                {% if user.is_authenticated %}
+                    <a class="header-icon-link" href="{% url 'reservation_history' %}" aria-label="Reservation history" title="Reservation history">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </a>
+                    <span class="user-pill"><i class="fa-solid fa-user"></i> {{ user.username }}</span>
+                    <a class="btn-outline" href="{% url 'logout' %}">Log out</a>
+                {% else %}
+                    <a class="btn-outline" href="{% url 'login' %}">Log in</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <main class="home-main workflow-page-main">
+            <section class="section workflow-hero-section">
+                <div class="workflow-hero-card">
+                    <div class="workflow-hero-copy">
+                        <span class="workflow-kicker">Booking journey</span>
+                        <h1>Reservation workflow</h1>
+                        <p>Follow the same path used by your clients and team, from vehicle search to return tracking and final closure.</p>
+                        <div class="hero-actions workflow-hero-actions">
+                            <a class="btn-primary" href="#search-and-narrow">Start with search</a>
+                            <a class="btn-outline btn-ghost" href="{% url 'cars' %}">Browse cars</a>
+                        </div>
+                    </div>
+                    <div class="workflow-highlight-grid">
+                        <a class="workflow-highlight-card" href="#search-and-narrow">
+                            <span class="process-step">01</span>
+                            <h3>Search and narrow</h3>
+                            <p>Review the fleet, filters, and availability signals before choosing a car.</p>
+                            <span class="workflow-highlight-action">Go to step <i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                        <a class="workflow-highlight-card" href="#confirm-reservation">
+                            <span class="process-step">02</span>
+                            <h3>Confirm reservation</h3>
+                            <p>Send the reservation request with dates, totals, and client details.</p>
+                            <span class="workflow-highlight-action">Go to step <i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                        <a class="workflow-highlight-card" href="#track-completion">
+                            <span class="process-step">03</span>
+                            <h3>Track completion</h3>
+                            <p>Watch approval, payment, pickup, and return updates until the booking ends.</p>
+                            <span class="workflow-highlight-action">Go to step <i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section workflow-step-section" id="search-and-narrow">
+                <div class="section-head workflow-section-head">
+                    <div>
+                        <span class="workflow-kicker">Step 01</span>
+                        <h2>Search and narrow</h2>
+                        <p>The client starts on the public side, opens the fleet, and compares only vehicles that match the trip.</p>
+                    </div>
+                    <a class="workflow-jump-link" href="#confirm-reservation">Next step <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <div class="workflow-detail-grid">
+                    <article class="workflow-detail-card">
+                        <h3>Client actions</h3>
+                        <ul class="workflow-list">
+                            <li>Open the Cars page and review all available vehicles.</li>
+                            <li>Use category, fuel, and status filters to reduce the list.</li>
+                            <li>Check the vehicle details page before starting the booking.</li>
+                        </ul>
+                    </article>
+                    <article class="workflow-detail-card">
+                        <h3>System response</h3>
+                        <ul class="workflow-list">
+                            <li>Shows updated vehicle data directly from the database.</li>
+                            <li>Keeps car details, price, and description visible in one place.</li>
+                            <li>Prepares the selected vehicle for the reservation request page.</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <section class="section workflow-step-section" id="confirm-reservation">
+                <div class="section-head workflow-section-head">
+                    <div>
+                        <span class="workflow-kicker">Step 02</span>
+                        <h2>Confirm reservation</h2>
+                        <p>After choosing a car, the client enters trip dates and sends a reservation request for admin approval.</p>
+                    </div>
+                    <a class="workflow-jump-link" href="#track-completion">Next step <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <div class="workflow-detail-grid">
+                    <article class="workflow-detail-card">
+                        <h3>Client actions</h3>
+                        <ul class="workflow-list">
+                            <li>Pick start and end dates on the reservation page.</li>
+                            <li>Review estimated total and send the request.</li>
+                            <li>Wait for admin validation and payment recording.</li>
+                        </ul>
+                    </article>
+                    <article class="workflow-detail-card">
+                        <h3>Admin actions</h3>
+                        <ul class="workflow-list">
+                            <li>Receives a real-time notification in the admin panel.</li>
+                            <li>Checks the request, then accepts or updates the reservation.</li>
+                            <li>Follows payment, guarantee, and finance items when needed.</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <section class="section workflow-step-section" id="track-completion">
+                <div class="section-head workflow-section-head">
+                    <div>
+                        <span class="workflow-kicker">Step 03</span>
+                        <h2>Track completion</h2>
+                        <p>Once the car is on the road, the team keeps the reservation open until the vehicle is returned and the admin closes it.</p>
+                    </div>
+                    <a class="workflow-jump-link" href="{% url 'index' %}#workflow">Back to homepage preview <i class="fa-solid fa-house"></i></a>
+                </div>
+                <div class="workflow-detail-grid">
+                    <article class="workflow-detail-card">
+                        <h3>Operations follow-up</h3>
+                        <ul class="workflow-list">
+                            <li>Track reservation status from pending to accepted to ended.</li>
+                            <li>Keep maintenance, guarantees, and fixed-charge alerts visible to the admin.</li>
+                            <li>Protect vehicle availability so the fleet stays accurate for the next client.</li>
+                        </ul>
+                    </article>
+                    <article class="workflow-detail-card">
+                        <h3>Client visibility</h3>
+                        <ul class="workflow-list">
+                            <li>Clients can open reservation history to see active and past bookings.</li>
+                            <li>The reservation remains active until the admin marks it as ended.</li>
+                            <li>History stays organized for future follow-up and reporting.</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <span>&copy; 2026 Car Rental.</span>
+        </footer>
+    </div>
+
+    <script src="{% static 'js/site_theme.js' %}"></script>
+</body>
+</html>

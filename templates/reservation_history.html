@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation History | Car Rental</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-copy">
+                    <div class="brand-title">Car Rental</div>
+                </div>
+            </div>
+
+            <nav class="main-nav" aria-label="Primary">
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'cars' %}">Cars</a>
+                <a href="{% url 'workflow' %}">Workflow</a>
+                <a class="active" href="{% url 'reservation_history' %}">Reservations</a>
+            </nav>
+
+            <div class="topbar-actions">
+                <button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <span class="user-pill"><i class="fa-solid fa-user"></i> {{ user.username }}</span>
+                <a class="btn-outline" href="{% url 'logout' %}">Log out</a>
+            </div>
+        </header>
+
+        <main class="home-main">
+            <section class="section reservation-history-section">
+                <div class="section-head">
+                    <h2>My reservations</h2>
+                    <p>See the bookings that are active now and the reservations you made before.</p>
+                </div>
+
+                <div class="reservation-history-grid">
+                    <article class="reservation-history-card">
+                        <div class="reservation-history-title">
+                            <h3><i class="fa-solid fa-clock"></i> Current reservations</h3>
+                            <span>{{ active_reservations|length }}</span>
+                        </div>
+                        {% if active_reservations %}
+                            <div class="reservation-list">
+                                {% for reservation in active_reservations %}
+                                    <article class="reservation-item reservation-item--active">
+                                        <div class="reservation-item-media">
+                                            {% if reservation.vehicle.photo %}
+                                                <img src="{{ reservation.vehicle.photo.url }}" alt="{{ reservation.vehicle.brand }} {{ reservation.vehicle.model }}">
+                                            {% else %}
+                                                <div class="reservation-photo-placeholder">
+                                                    <i class="fa-solid fa-car-side"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="reservation-item-body">
+                                            <div class="reservation-item-head">
+                                                <div class="reservation-item-heading">
+                                                    <h4>{{ reservation.vehicle.brand }} {{ reservation.vehicle.model }}</h4>
+                                                    <div class="reservation-specs-row">
+                                                        <span>{{ reservation.vehicle.year }}</span>
+                                                        <span>{{ reservation.vehicle.category }}</span>
+                                                        <span>{{ reservation.vehicle.fuel_type }}</span>
+                                                    </div>
+                                                    <div class="reservation-specs-row reservation-specs-row--muted">
+                                                        <span>{{ reservation.vehicle.mileage }} km</span>
+                                                        <span>{{ reservation.vehicle.status }}</span>
+                                                        <span>${{ reservation.vehicle.daily_price|floatformat:2 }}/day</span>
+                                                    </div>
+                                                </div>
+                                                <span class="reservation-badge reservation-badge--active">{{ reservation.status|title }}</span>
+                                            </div>
+                                            <p class="reservation-description">{{ reservation.vehicle.description|default:"Comfortable vehicle ready for your next trip."|truncatechars:110 }}</p>
+                                            <dl class="reservation-card-details">
+                                                <div>
+                                                    <dt>Period</dt>
+                                                    <dd>{{ reservation.start_date|date:"F j, Y" }} to {{ reservation.end_date|date:"F j, Y" }}</dd>
+                                                </div>
+                                                <div>
+                                                    <dt>Total</dt>
+                                                    <dd>${{ reservation.total_price|floatformat:0 }}</dd>
+                                                </div>
+                                                <div>
+                                                    <dt>Payment</dt>
+                                                    <dd>{{ reservation.payment_status|title }}</dd>
+                                                </div>
+                                                <div>
+                                                    <dt>Reservation</dt>
+                                                    <dd>#{{ reservation.id }}</dd>
+                                                </div>
+                                            </dl>
+                                        </div>
+                                    </article>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="reservation-empty">You have no active reservations right now.</p>
+                        {% endif %}
+                    </article>
+
+                    <article class="reservation-history-card">
+                        <div class="reservation-history-title">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Reservation history</h3>
+                            <span>{{ reservation_history|length }}</span>
+                        </div>
+                        {% if reservation_history %}
+                            <div class="reservation-list">
+                                {% for reservation in reservation_history %}
+                                    <article class="reservation-item">
+                                        <div class="reservation-item-media">
+                                            {% if reservation.vehicle.photo %}
+                                                <img src="{{ reservation.vehicle.photo.url }}" alt="{{ reservation.vehicle.brand }} {{ reservation.vehicle.model }}">
+                                            {% else %}
+                                                <div class="reservation-photo-placeholder">
+                                                    <i class="fa-solid fa-car-side"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="reservation-item-body">
+                                            <div class="reservation-item-head">
+                                                <div class="reservation-item-heading">
+                                                    <h4>{{ reservation.vehicle.brand }} {{ reservation.vehicle.model }}</h4>
+                                                    <div class="reservation-specs-row">
+                                                        <span>{{ reservation.vehicle.year }}</span>
+                                                        <span>{{ reservation.vehicle.category }}</span>
+                                                        <span>{{ reservation.vehicle.fuel_type }}</span>
+                                                    </div>
+                                                    <div class="reservation-specs-row reservation-specs-row--muted">
+                                                        <span>{{ reservation.vehicle.mileage }} km</span>
+                                                        <span>{{ reservation.vehicle.status }}</span>
+                                                        <span>${{ reservation.vehicle.daily_price|floatformat:2 }}/day</span>
+                                                    </div>
+                                                </div>
+                                                <span class="reservation-badge">{{ reservation.status|title }}</span>
+                                            </div>
+                                            <p class="reservation-description">{{ reservation.vehicle.description|default:"A practical choice for everyday driving and comfortable trips."|truncatechars:110 }}</p>
+                                            <dl class="reservation-card-details">
+                                                <div>
+                                                    <dt>Period</dt>
+                                                    <dd>{{ reservation.start_date|date:"F j, Y" }} to {{ reservation.end_date|date:"F j, Y" }}</dd>
+                                                </div>
+                                                <div>
+                                                    <dt>Total</dt>
+                                                    <dd>${{ reservation.total_price|floatformat:0 }}</dd>
+                                                </div>
+                                                <div>
+                                                    <dt>Payment</dt>
+                                                    <dd>{{ reservation.payment_status|title }}</dd>
+                                                </div>
+                                                <div>
+                                                    <dt>Reservation</dt>
+                                                    <dd>#{{ reservation.id }}</dd>
+                                                </div>
+                                            </dl>
+                                        </div>
+                                    </article>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="reservation-empty">Your completed and older reservations will appear here.</p>
+                        {% endif %}
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{% static 'js/site_theme.js' %}"></script>
+</body>
+</html>

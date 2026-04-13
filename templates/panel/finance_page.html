@@ -1,0 +1,963 @@
+{% extends 'panel/admin_panel.html' %}
+
+{% block title %}Finance | Admin{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("deposit-reservation-search");
+    const reservationSelect = document.getElementById("{{ deposit_form.reservation.id_for_label }}");
+
+    if (!searchInput || !reservationSelect) {
+      return;
+    }
+
+    const originalOptions = Array.from(reservationSelect.options).map(function (option) {
+      return {
+        value: option.value,
+        text: option.text,
+        selected: option.selected,
+      };
+    });
+
+    const renderOptions = function (query) {
+      const words = query
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(Boolean);
+
+      const currentValue = reservationSelect.value;
+      reservationSelect.innerHTML = "";
+
+      let hasMatch = false;
+
+      originalOptions.forEach(function (optionData) {
+        const haystack = optionData.text.toLowerCase();
+        const matches = words.length === 0 || words.every(function (word) {
+          return haystack.includes(word);
+        });
+
+        if (!matches) {
+          return;
+        }
+
+        hasMatch = true;
+        const option = document.createElement("option");
+        option.value = optionData.value;
+        option.textContent = optionData.text;
+        if (optionData.value === currentValue || (!currentValue && optionData.selected)) {
+          option.selected = true;
+        }
+        reservationSelect.appendChild(option);
+      });
+
+      if (!hasMatch) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "No reservation found";
+        option.selected = true;
+        reservationSelect.appendChild(option);
+      }
+    };
+
+    searchInput.addEventListener("input", function (event) {
+      renderOptions(event.target.value);
+    });
+  });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 35px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .header h1 i {
+        color: #6dd5ed;
+        filter: drop-shadow(0 0 10px rgba(109, 213, 237, 0.5));
+    }
+
+    .header-pill {
+        background: rgba(109, 213, 237, 0.15);
+        border: 1px solid rgba(109, 213, 237, 0.4);
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        letter-spacing: 1px;
+        color: #6dd5ed;
+    }
+
+    .message-stack {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .message {
+        border-radius: 14px;
+        padding: 14px 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .message.success {
+        border-color: rgba(126, 240, 168, 0.35);
+        background: rgba(126, 240, 168, 0.12);
+    }
+
+    .message.error {
+        border-color: rgba(255, 120, 120, 0.35);
+        background: rgba(255, 120, 120, 0.12);
+    }
+
+    .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+        font-size: 1.2rem;
+        margin-bottom: 6px;
+    }
+
+    .section-head p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .management-grid,
+    .finance-grid,
+    .deposit-summary-grid,
+    .roi-grid {
+        display: grid;
+        gap: 20px;
+    }
+
+    .management-grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        margin-bottom: 34px;
+    }
+
+    .finance-grid,
+    .roi-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .deposit-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 18px;
+    }
+
+    .panel-card,
+    .finance-card,
+    .deposit-summary-card,
+    .deposit-row,
+    .roi-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    .panel-card,
+    .finance-card,
+    .roi-card,
+    .deposit-row {
+        padding: 22px;
+    }
+
+    .panel-card {
+        display: grid;
+        gap: 18px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .form-field {
+        display: grid;
+        gap: 8px;
+    }
+
+    .form-field label {
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.88);
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(9, 14, 27, 0.68);
+        color: white;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+
+    .form-field textarea {
+        min-height: 96px;
+        resize: vertical;
+    }
+
+    .form-field--full {
+        grid-column: 1 / -1;
+    }
+
+    .field-help {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.56);
+    }
+
+    .search-field {
+        margin-bottom: 10px;
+    }
+
+    .field-error {
+        color: #ff9f9f;
+        font-size: 0.8rem;
+    }
+
+    .primary-button,
+    .secondary-button {
+        border: none;
+        border-radius: 14px;
+        padding: 12px 18px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .primary-button {
+        color: #08111f;
+        background: linear-gradient(135deg, #6dd5ed 0%, #a7f3ff 100%);
+        box-shadow: 0 12px 24px rgba(109, 213, 237, 0.22);
+    }
+
+    .secondary-button {
+        color: white;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .deposit-summary-card {
+        padding: 18px;
+        display: grid;
+        gap: 6px;
+    }
+
+    .deposit-summary-card span {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .deposit-summary-card strong {
+        font-size: 1.2rem;
+    }
+
+    .deposit-summary-card p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.9rem;
+    }
+
+    .status-badge {
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        white-space: nowrap;
+    }
+
+    .status-badge--pending {
+        color: #f7d777;
+        background: rgba(247, 215, 119, 0.12);
+        border-color: rgba(247, 215, 119, 0.28);
+    }
+
+    .status-badge--returned {
+        color: #7ef0a8;
+        background: rgba(126, 240, 168, 0.12);
+        border-color: rgba(126, 240, 168, 0.28);
+    }
+
+    .status-badge--cashed {
+        color: #ff9f9f;
+        background: rgba(255, 120, 120, 0.12);
+        border-color: rgba(255, 120, 120, 0.28);
+    }
+
+    .status-badge--info {
+        color: #6dd5ed;
+        background: rgba(109, 213, 237, 0.12);
+        border-color: rgba(109, 213, 237, 0.28);
+    }
+
+    .deposit-list {
+        display: grid;
+        gap: 16px;
+    }
+
+    .deposit-row {
+        display: grid;
+        gap: 16px;
+    }
+
+    .deposit-row-head,
+    .finance-card-head,
+    .roi-card-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: flex-start;
+    }
+
+    .deposit-row-head h3,
+    .finance-card-head h3,
+    .roi-card-head h3 {
+        margin-bottom: 4px;
+    }
+
+    .deposit-row-head p,
+    .finance-card-head p,
+    .roi-card-head p {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 0.84rem;
+    }
+
+    .deposit-meta,
+    .roi-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        color: rgba(255, 255, 255, 0.66);
+        font-size: 0.84rem;
+    }
+
+    .deposit-meta span,
+    .roi-meta span {
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .deposit-status-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .deposit-status-form select {
+        min-width: 170px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(9, 14, 27, 0.68);
+        color: white;
+        padding: 11px 12px;
+    }
+
+    .finance-card {
+        display: grid;
+        gap: 16px;
+    }
+
+    .finance-pill {
+        border-radius: 999px;
+        padding: 6px 12px;
+        background: rgba(109, 213, 237, 0.12);
+        border: 1px solid rgba(109, 213, 237, 0.3);
+        color: #6dd5ed;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .finance-metrics,
+    .roi-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .finance-metric,
+    .roi-metric {
+        border-radius: 14px;
+        padding: 12px;
+        display: grid;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .finance-metric span,
+    .roi-metric span {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .finance-metric strong,
+    .roi-metric strong {
+        font-size: 1.05rem;
+        color: white;
+    }
+
+    .finance-metric--in strong,
+    .roi-metric--income strong { color: #6dd5ed; }
+
+    .finance-metric--out strong,
+    .roi-metric--expenses strong { color: #ff9f68; }
+
+    .finance-metric--net strong,
+    .roi-metric--net strong { color: #ffffff; }
+
+    .finance-breakdown {
+        display: grid;
+        gap: 10px;
+    }
+
+    .finance-breakdown h4 {
+        font-size: 0.92rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .finance-breakdown ul {
+        list-style: none;
+        display: grid;
+        gap: 8px;
+        padding: 0;
+        margin: 0;
+    }
+
+    .finance-breakdown li {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 0.85rem;
+    }
+
+    .finance-note {
+        margin-top: 18px;
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    .roi-section {
+        margin-top: 38px;
+    }
+
+    .roi-card {
+        display: grid;
+        gap: 14px;
+    }
+
+    @media (max-width: 980px) {
+        .management-grid,
+        .deposit-summary-grid,
+        .finance-metrics,
+        .roi-metrics,
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header">
+    <div>
+      <h1><i class="fa-solid fa-chart-line"></i> Finance Management</h1>
+    </div>
+    <div class="header-pill">Management</div>
+  </header>
+
+  {% if messages %}
+    <div class="message-stack">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <section class="management-grid">
+    <article class="panel-card">
+      <div class="section-head" style="margin-bottom: 0;">
+        <div>
+          <h2>Add Expense</h2>
+          <p>Record fuel, leasing, spare parts, oil change, or any other outgoing cost.</p>
+        </div>
+        <div class="header-pill">Expense</div>
+      </div>
+
+      {% if expense_form.non_field_errors %}
+        <div class="field-error">{{ expense_form.non_field_errors }}</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="expense">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="{{ expense_form.vehicle.id_for_label }}">Vehicle</label>
+            {{ expense_form.vehicle }}
+            <div class="field-help">Leave empty for a general expense not tied to one vehicle.</div>
+            {% for error in expense_form.vehicle.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ expense_form.category.id_for_label }}">Category</label>
+            {{ expense_form.category }}
+            {% for error in expense_form.category.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ expense_form.amount.id_for_label }}">Amount</label>
+            {{ expense_form.amount }}
+            {% for error in expense_form.amount.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ expense_form.date.id_for_label }}">Date</label>
+            {{ expense_form.date }}
+            {% for error in expense_form.date.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field form-field--full">
+            <label for="{{ expense_form.description.id_for_label }}">Description</label>
+            {{ expense_form.description }}
+            {% for error in expense_form.description.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="primary-button">Add expense</button>
+      </form>
+    </article>
+
+    <article class="panel-card">
+      <div class="section-head" style="margin-bottom: 0;">
+        <div>
+          <h2>Guarantee Tracking</h2>
+          <p>Track security deposits by check, cash, or card hold.</p>
+        </div>
+        <div class="header-pill">Deposit</div>
+      </div>
+
+      {% if deposit_form.non_field_errors %}
+        <div class="field-error">{{ deposit_form.non_field_errors }}</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="deposit">
+        <div class="form-grid">
+          <div class="form-field form-field--full">
+            <label for="{{ deposit_form.reservation.id_for_label }}">Reservation</label>
+            <input
+              type="text"
+              id="deposit-reservation-search"
+              class="field-input search-field"
+              placeholder="Search reservation by client, car, or reservation number"
+              autocomplete="off"
+            >
+            {{ deposit_form.reservation }}
+            <div class="field-help">Type any word to filter reservations instantly.</div>
+            {% for error in deposit_form.reservation.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ deposit_form.amount.id_for_label }}">Deposit amount</label>
+            {{ deposit_form.amount }}
+            {% for error in deposit_form.amount.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ deposit_form.method.id_for_label }}">Guarantee type</label>
+            {{ deposit_form.method }}
+            {% for error in deposit_form.method.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ deposit_form.status.id_for_label }}">Status</label>
+            {{ deposit_form.status }}
+            {% for error in deposit_form.status.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ deposit_form.received_at.id_for_label }}">Received on</label>
+            {{ deposit_form.received_at }}
+            {% for error in deposit_form.received_at.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field form-field--full">
+            <label for="{{ deposit_form.notes.id_for_label }}">Notes</label>
+            {{ deposit_form.notes }}
+            {% for error in deposit_form.notes.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="primary-button">Add guarantee</button>
+      </form>
+    </article>
+
+    <article class="panel-card">
+      <div class="section-head" style="margin-bottom: 0;">
+        <div>
+          <h2>Fixed Charge Alerts</h2>
+          <p>Track insurance, technical inspection, vignette, and bank installment deadlines.</p>
+        </div>
+        <div class="header-pill">Alerts</div>
+      </div>
+
+      {% if fixed_charge_form.non_field_errors %}
+        <div class="field-error">{{ fixed_charge_form.non_field_errors }}</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="fixed_charge">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="{{ fixed_charge_form.vehicle.id_for_label }}">Vehicle</label>
+            {{ fixed_charge_form.vehicle }}
+            {% for error in fixed_charge_form.vehicle.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ fixed_charge_form.category.id_for_label }}">Charge type</label>
+            {{ fixed_charge_form.category }}
+            {% for error in fixed_charge_form.category.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ fixed_charge_form.due_date.id_for_label }}">Due date</label>
+            {{ fixed_charge_form.due_date }}
+            {% for error in fixed_charge_form.due_date.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field">
+            <label for="{{ fixed_charge_form.amount.id_for_label }}">Amount</label>
+            {{ fixed_charge_form.amount }}
+            {% for error in fixed_charge_form.amount.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-field form-field--full">
+            <label for="{{ fixed_charge_form.notes.id_for_label }}">Notes</label>
+            {{ fixed_charge_form.notes }}
+            {% for error in fixed_charge_form.notes.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="primary-button">Add alert</button>
+      </form>
+    </article>
+  </section>
+
+  <section style="margin-bottom: 34px;">
+    <div class="section-head">
+      <div>
+        <h2>Fixed Charge Status Overview</h2>
+        <p>Automatic alerts highlight deadlines that can generate penalties if they are missed.</p>
+      </div>
+      <div class="header-pill">Due dates</div>
+    </div>
+
+    <div class="deposit-summary-grid">
+      {% for item in fixed_charge_summary %}
+        <article class="deposit-summary-card">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.count }}</strong>
+          <p>{{ item.amount|floatformat:2 }} TND</p>
+        </article>
+      {% endfor %}
+    </div>
+
+    <div class="deposit-list">
+      {% for alert in fixed_charge_alerts %}
+        <article class="deposit-row">
+          <div class="deposit-row-head">
+            <div>
+              <h3>{{ alert.category_label }} - {{ alert.vehicle_name }}</h3>
+              <p>Due on {{ alert.due_date }} - {{ alert.due_text }}</p>
+            </div>
+            <span class="status-badge {{ alert.status_class }}">{{ alert.status_label }}</span>
+          </div>
+
+          <div class="deposit-meta">
+            <span>Vehicle: {{ alert.vehicle_name }}</span>
+            <span>Amount: {{ alert.amount|floatformat:2 }} TND</span>
+            <span>Status: {{ alert.status_label }}</span>
+          </div>
+
+          {% if alert.notes %}
+            <p class="finance-note" style="margin-top: 0;">{{ alert.notes }}</p>
+          {% endif %}
+
+          <form method="post" class="deposit-status-form">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="fixed_charge_status">
+            <input type="hidden" name="alert_id" value="{{ alert.id }}">
+            <select name="status">
+              {% for value, label in fixed_charge_status_choices %}
+                <option value="{{ value }}"{% if alert.status == value %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="secondary-button">Update alert</button>
+          </form>
+        </article>
+      {% empty %}
+        <article class="deposit-row">
+          <div class="deposit-row-head">
+            <div>
+              <h3>No fixed charge alerts yet</h3>
+              <p>Add insurance, vignette, technical inspection, or bank installment deadlines above.</p>
+            </div>
+            <span class="status-badge status-badge--info">Empty</span>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section style="margin-bottom: 34px;">
+    <div class="section-head">
+      <div>
+        <h2>Guarantee Status Overview</h2>
+        <p>Follow pending, returned, and cashed guarantees without mixing them into income or expenses.</p>
+      </div>
+      <div class="header-pill">Status</div>
+    </div>
+
+    <div class="deposit-summary-grid">
+      {% for item in deposit_summary %}
+        <article class="deposit-summary-card">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.amount|floatformat:2 }} TND</strong>
+          <p>{{ item.count }} guarantee{{ item.count|pluralize }}</p>
+        </article>
+      {% endfor %}
+    </div>
+
+    <div class="deposit-list">
+      {% for deposit in deposits %}
+        <article class="deposit-row">
+          <div class="deposit-row-head">
+            <div>
+              <h3>Reservation #{{ deposit.reservation.id }} - {{ deposit.reservation.vehicle.brand }} {{ deposit.reservation.vehicle.model }}</h3>
+              <p>{{ deposit.reservation.client.first_name }} {{ deposit.reservation.client.last_name }} - {{ deposit.reservation.start_date }} to {{ deposit.reservation.end_date }}</p>
+            </div>
+            <span class="status-badge {% if deposit.status == 'pending' %}status-badge--pending{% elif deposit.status == 'returned' %}status-badge--returned{% else %}status-badge--cashed{% endif %}">
+              {{ deposit.get_status_display }}
+            </span>
+          </div>
+
+          <div class="deposit-meta">
+            <span>Type: {{ deposit.get_method_display }}</span>
+            <span>Amount: {{ deposit.amount|floatformat:2 }} TND</span>
+            <span>Received: {{ deposit.received_at }}</span>
+            <span>Resolved: {{ deposit.resolved_at|default:"-" }}</span>
+          </div>
+
+          {% if deposit.notes %}
+            <p class="finance-note" style="margin-top: 0;">{{ deposit.notes }}</p>
+          {% endif %}
+
+          <form method="post" class="deposit-status-form">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="deposit_status">
+            <input type="hidden" name="deposit_id" value="{{ deposit.id }}">
+            <select name="status">
+              {% for value, label in deposit_status_choices %}
+                <option value="{{ value }}"{% if deposit.status == value %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="secondary-button">Update status</button>
+          </form>
+        </article>
+      {% empty %}
+        <article class="deposit-row">
+          <div class="deposit-row-head">
+            <div>
+              <h3>No guarantees recorded yet</h3>
+              <p>Add the first guarantee from the form above.</p>
+            </div>
+            <span class="status-badge status-badge--pending">Empty</span>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div>
+        <h2>Income and Expenses</h2>
+        <p>Track rental income and operating expenses by day, week, and month.</p>
+      </div>
+      <div class="header-pill">Summary</div>
+    </div>
+
+    <div class="finance-grid">
+      {% for period in finance_summary %}
+        <article class="finance-card">
+          <div class="finance-card-head">
+            <div>
+              <h3>{{ period.label }}</h3>
+              <p>{{ period.range_label }}</p>
+            </div>
+            <span class="finance-pill">{{ period.label }}</span>
+          </div>
+
+          <div class="finance-metrics">
+            <div class="finance-metric finance-metric--in">
+              <span>Income</span>
+              <strong>{{ period.income|floatformat:2 }} TND</strong>
+            </div>
+            <div class="finance-metric finance-metric--out">
+              <span>Expenses</span>
+              <strong>{{ period.expenses|floatformat:2 }} TND</strong>
+            </div>
+            <div class="finance-metric finance-metric--net">
+              <span>Balance</span>
+              <strong>{{ period.net|floatformat:2 }} TND</strong>
+            </div>
+          </div>
+
+          <div class="finance-breakdown">
+            <h4>Expense breakdown</h4>
+            <ul>
+              {% for expense in period.expense_breakdown %}
+                <li>
+                  <span>{{ expense.label }}</span>
+                  <strong>{{ expense.amount|floatformat:2 }} TND</strong>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    <p class="finance-note">Guarantees are tracked separately and are not included in income, expenses, or balance.</p>
+  </section>
+
+  <section class="roi-section">
+    <div class="section-head">
+      <div>
+        <h2>Vehicle Profitability (ROI)</h2>
+        <p>Total income minus total expenses for each vehicle.</p>
+      </div>
+      <div class="header-pill">ROI</div>
+    </div>
+
+    <div class="roi-grid">
+      {% for item in vehicle_roi_summary %}
+        <article class="roi-card">
+          <div class="roi-card-head">
+            <div>
+              <h3>{{ item.vehicle.brand }} {{ item.vehicle.model }}</h3>
+              <p>{{ item.reference }} - {{ item.vehicle.category }} - {{ item.vehicle.year }}</p>
+            </div>
+            <span class="status-badge {% if item.performance == 'Profitable' %}status-badge--returned{% elif item.performance == 'Loss-making' %}status-badge--cashed{% else %}status-badge--pending{% endif %}">{{ item.performance }}</span>
+          </div>
+
+          <div class="roi-metrics">
+            <div class="roi-metric roi-metric--income">
+              <span>Total income</span>
+              <strong>{{ item.total_income|floatformat:2 }} TND</strong>
+            </div>
+            <div class="roi-metric roi-metric--expenses">
+              <span>Total expenses</span>
+              <strong>{{ item.total_expenses|floatformat:2 }} TND</strong>
+            </div>
+            <div class="roi-metric roi-metric--net">
+              <span>Net result</span>
+              <strong>{{ item.net_result|floatformat:2 }} TND</strong>
+            </div>
+          </div>
+
+          <div class="roi-meta">
+            <span>Status: {{ item.vehicle.status }}</span>
+            <span>Fuel: {{ item.vehicle.fuel_type }}</span>
+            <span>Mileage: {{ item.vehicle.mileage }} km</span>
+          </div>
+        </article>
+      {% empty %}
+        <article class="roi-card">
+          <div class="roi-card-head">
+            <div>
+              <h3>No vehicles yet</h3>
+              <p>Add vehicles to start tracking profitability.</p>
+            </div>
+            <span class="status-badge status-badge--pending">ROI</span>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

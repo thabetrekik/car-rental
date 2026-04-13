@@ -1,0 +1,250 @@
+{% extends 'panel/admin_panel.html' %}
+
+{% block title %}Reservations | Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .section-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(244, 179, 97, 0.18);
+    border: 1px solid rgba(244, 179, 97, 0.4);
+    color: var(--accent-strong);
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .reservation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px;
+  }
+
+  .reservation-card {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reservation-title {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .reservation-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .reservation-quote {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .reservation-quote div {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .reservation-quote dt {
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-bottom: 3px;
+  }
+
+  .reservation-quote dd {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .status-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .status-wrap label {
+    display: grid;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .status-wrap select {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    padding: 8px 9px;
+  }
+
+  .status-wrap option {
+    color: #111;
+  }
+
+  .reservation-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  .btn-ghost,
+  .btn-danger {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .btn-ghost {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .btn-danger {
+    border-color: rgba(255, 119, 119, 0.4);
+    background: rgba(255, 94, 94, 0.2);
+    color: #ffd9d9;
+  }
+
+  .btn-ghost:hover,
+  .btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+  }
+
+  .empty-state {
+    margin: 0;
+    color: var(--muted);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header">
+    <div>
+      <h1><i class="fa-solid fa-calendar-check"></i> Reservations</h1>
+      <p>View all client reservations and update payment and booking statuses.</p>
+    </div>
+    <div class="header-pill">Reservations</div>
+  </header>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <section class="panel-card">
+    <div class="section-header">
+      <h2>Reservation List</h2>
+      <span class="badge">{{ reservations|length }} reservations</span>
+    </div>
+
+    {% if reservations %}
+      <div class="reservation-grid">
+        {% for reservation in reservations %}
+          <article class="reservation-card">
+            <div class="reservation-title">
+              {{ reservation.vehicle.brand }} {{ reservation.vehicle.model }} - #{{ reservation.id }}
+            </div>
+            <div class="reservation-meta">
+              <span>Client: {{ reservation.client.last_name }} {{ reservation.client.first_name }}</span>
+              <span>@{{ reservation.client.user.username }}</span>
+            </div>
+            <div class="reservation-meta">
+              <span>From {{ reservation.start_date }}</span>
+              <span>To {{ reservation.end_date }}</span>
+              <span>Created {{ reservation.created_at|date:"Y-m-d H:i" }}</span>
+            </div>
+
+            <dl class="reservation-quote">
+              <div>
+                <dt>Days</dt>
+                <dd>{{ reservation.number_of_days }}</dd>
+              </div>
+              <div>
+                <dt>Total</dt>
+                <dd>${{ reservation.total_price }}</dd>
+              </div>
+            </dl>
+
+            <div class="reservation-actions">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="reservation_id" value="{{ reservation.id }}">
+                <div class="status-wrap">
+                  <label>
+                    Payment status
+                    <select name="payment_status">
+                      {% for value, label in payment_choices %}
+                        <option value="{{ value }}"{% if reservation.payment_status|lower == value %} selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </label>
+                  <label>
+                    Reservation status
+                    <select name="status">
+                      {% for value, label in status_choices %}
+                        <option value="{{ value }}"{% if reservation.status|lower == value %} selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </label>
+                </div>
+
+                <button type="submit" class="btn-ghost">
+                  <i class="fa-solid fa-floppy-disk"></i> Update
+                </button>
+              </form>
+              <form method="post" action="{% url 'reservation_delete' reservation.id %}" onsubmit="return confirm('Delete this reservation?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger">
+                  <i class="fa-solid fa-trash"></i> Delete
+                </button>
+              </form>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-state">No reservations yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet - Car Rental</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/reservation.css' %}">
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">
+                
+                <div class="brand-copy">
+                    <div class="brand-title">Car Rental</div>
+                    
+                </div>
+            </div>
+
+            <nav class="main-nav" aria-label="Cars navigation">
+                <a href="{% url 'index' %}">Home</a>
+                <a class="active" href="{% url 'cars' %}">Cars</a>
+                <a href="{% url 'workflow' %}">Workflow</a>
+                <a href="{% url 'reservation_history' %}">Reservations</a>
+            </nav>
+
+            <div class="topbar-actions">
+                <button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                {% if user.is_authenticated %}
+                    <span class="user-pill"><i class="fa-solid fa-user"></i> {{ user.username }}</span>
+                    <a class="btn-outline" href="{% url 'logout' %}">Log out</a>
+                {% else %}
+                    <a class="btn-outline" href="{% url 'login' %}">Log in</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <main>
+            {% if messages %}
+                <section class="flash-list" aria-label="Messages">
+                    {% for message in messages %}
+                        <div class="flash {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+
+            <section class="hero">
+                <h1>Fleet availability</h1>
+                <p>Review vehicle profiles, compare category and fuel type, then open details to continue booking.</p>
+                <div class="hero-stats">
+                    <span class="stat-chip"><i class="fa-solid fa-car-side"></i> {{ vehicles|length }} cars listed</span>
+                    {% if query or selected_category or selected_fuel or selected_status %}
+                        <span class="stat-chip"><i class="fa-solid fa-filter"></i> Filters active</span>
+                    {% else %}
+                        <span class="stat-chip"><i class="fa-solid fa-sliders"></i> No filters</span>
+                    {% endif %}
+                </div>
+            </section>
+
+            <form method="get" class="filter-form" aria-label="Cars filters">
+                <label class="filter-field filter-search">
+                    <span>Search</span>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ query }}"
+                        placeholder="Brand, model, category..."
+                    >
+                </label>
+
+                <label class="filter-field">
+                    <span>Category</span>
+                    <select name="category">
+                        <option value="">All categories</option>
+                        {% for item in category_choices %}
+                            <option value="{{ item }}" {% if selected_category == item %}selected{% endif %}>
+                                {{ item|title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label class="filter-field">
+                    <span>Fuel</span>
+                    <select name="fuel">
+                        <option value="">All fuel types</option>
+                        {% for item in fuel_choices %}
+                            <option value="{{ item }}" {% if selected_fuel == item %}selected{% endif %}>
+                                {{ item|title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label class="filter-field">
+                    <span>Status</span>
+                    <select name="status">
+                        <option value="">All statuses</option>
+                        {% for item in status_choices %}
+                            <option value="{{ item }}" {% if selected_status == item %}selected{% endif %}>
+                                {{ item|title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <div class="filter-actions">
+                    <button type="submit" class="filter-btn">Apply</button>
+                    {% if query or selected_category or selected_fuel or selected_status %}
+                        <a href="{% url 'cars' %}" class="clear-btn">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <section id="cars" class="car-grid">
+                {% for vehicle in vehicles %}
+                    <article class="car-card">
+                        <a class="car-link" href="{% url 'car_detail' vehicle.id %}" aria-label="Open {{ vehicle.brand }} {{ vehicle.model }} details">
+                            <div class="car-image">
+                                {% if vehicle.photo %}
+                                    <img src="{{ vehicle.photo.url }}" alt="{{ vehicle.brand }} {{ vehicle.model }}">
+                                {% else %}
+                                    <div class="car-placeholder">
+                                        <i class="fa-solid fa-car-side"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </a>
+
+                        <h2 class="car-title">
+                            <a class="car-title-link" href="{% url 'car_detail' vehicle.id %}">{{ vehicle.brand }} {{ vehicle.model }}</a>
+                        </h2>
+
+                        <div class="car-meta">
+                            <span class="meta-chip">{{ vehicle.category|default:"Category n/a" }}</span>
+                            <span class="meta-chip">{{ vehicle.fuel_type|default:"Fuel n/a" }}</span>
+                        </div>
+
+                        {% if vehicle.description %}
+                            <p class="car-desc">{{ vehicle.description }}</p>
+                        {% endif %}
+
+                        <div class="price-box">
+                            <div class="daily-price-label">Daily price</div>
+                            <div class="daily-price">${{ vehicle.daily_price|floatformat:0 }} / day</div>
+                        </div>
+
+                        <div class="vehicle-status {{ vehicle.status|lower }}">
+                            {{ vehicle.status|title }}
+                        </div>
+
+                        <div class="car-actions">
+                            <a class="details-btn" href="{% url 'car_detail' vehicle.id %}">Open details</a>
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="empty-state">
+                        <h2>No vehicles listed yet</h2>
+                        <p>The fleet page updates automatically when cars are added from the admin panel.</p>
+                    </div>
+                {% endfor %}
+            </section>
+        </main>
+    </div>
+
+    <script src="{% static 'js/site_theme.js' %}"></script>
+</body>
+</html>

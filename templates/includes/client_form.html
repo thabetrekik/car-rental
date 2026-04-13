@@ -1,0 +1,23 @@
+<div id="client-form" class="form-section{% if force_active or active_tab == 'client-form' %} active{% endif %}">
+  <form method="post" class="form" id="clients"{% if action_url %} action="{{ action_url }}"{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="client" />
+    
+    {% if client_form.non_field_errors %}
+      <div class="message error">{{ client_form.non_field_errors|striptags }}</div>
+    {% endif %}
+    
+    <div class="form-grid">
+      {% for field in client_form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="field-error">{{ field.errors|striptags }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn-primary">{{ button_label|default:"Save Client" }}</button>
+  </form>
+</div>

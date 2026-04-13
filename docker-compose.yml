@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      MYSQL_DATABASE: car_rental
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_HOST: db
+      MYSQL_PORT: "3306"
+      DJANGO_ALLOWED_HOSTS: 127.0.0.1,localhost,0.0.0.0
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: car_rental
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uadmin", "-padmin"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  mysql_data:

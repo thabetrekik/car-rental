@@ -1,0 +1,169 @@
+{% extends 'panel/admin_panel.html' %}
+
+{% block title %}Clients | Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .section-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(244, 179, 97, 0.18);
+    border: 1px solid rgba(244, 179, 97, 0.4);
+    color: var(--accent-strong);
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .client-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .client-card {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(10, 16, 22, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .client-title {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .client-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .client-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .btn-ghost,
+  .btn-danger {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .btn-ghost {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .btn-danger {
+    border-color: rgba(255, 119, 119, 0.4);
+    background: rgba(255, 94, 94, 0.2);
+    color: #ffd9d9;
+  }
+
+  .btn-ghost:hover,
+  .btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+  }
+
+  .empty-state {
+    margin: 0;
+    color: var(--muted);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header">
+    <div>
+      <h1><i class="fa-solid fa-users"></i> Clients</h1>
+      <p>Create and manage client accounts.</p>
+    </div>
+    <div class="header-pill">Clients</div>
+  </header>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <section class="panel-card">
+    {% include 'includes/client_form.html' with force_active=True %}
+  </section>
+
+  <section class="panel-card">
+    <div class="section-header">
+      <h2>Current Clients</h2>
+      <span class="badge">{{ clients|length }} clients</span>
+    </div>
+
+    {% if clients %}
+      <div class="client-grid">
+        {% for client in clients %}
+          <article class="client-card">
+            <div class="client-title">{{ client.last_name }} {{ client.first_name }}</div>
+            <div class="client-meta">
+              <span>@{{ client.user.username }}</span>
+              <span>{{ client.email }}</span>
+            </div>
+            <div class="client-meta">
+              {% if client.phone %}
+                <span>{{ client.phone }}</span>
+              {% endif %}
+              {% if client.birth_date %}
+                <span>{{ client.birth_date }}</span>
+              {% endif %}
+            </div>
+            <div class="client-actions">
+              <a class="btn-ghost" href="{% url 'client_edit' client.id %}">
+                <i class="fa-solid fa-pen"></i> Edit
+              </a>
+              <form method="post" action="{% url 'client_delete' client.id %}" onsubmit="return confirm('Delete this client?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger">
+                  <i class="fa-solid fa-trash"></i> Delete
+                </button>
+              </form>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-state">No clients yet. Add your first one above.</p>
+    {% endif %}
+  </section>
+{% endblock %}

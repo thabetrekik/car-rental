@@ -1,0 +1,53 @@
+<aside class="sidebar">
+  
+  <div class="brand">
+    <div class="brand-text">
+      <div class="brand-title">Admin</div>
+      <div class="brand-subtitle">Administrator</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    {% with current=request.resolver_match.url_name %}
+    <div class="nav-section">Management</div>
+    
+    <a class="nav-link{% if current == 'dashboard' or current == 'panel_admin' %} active{% endif %}" href="{% url 'dashboard' %}">
+        <i class="fa-solid fa-gauge"></i>
+        <span>Dashboard</span>
+    </a>
+    
+    <a class="nav-link{% if current == 'client_page' %} active{% endif %}" href="{% url 'client_page' %}">
+        <i class="fa-solid fa-users"></i>
+        <span>Clients</span>
+    </a>
+    
+    <a class="nav-link{% if current == 'vehicle_page' %} active{% endif %}" href="{% url 'vehicle_page' %}">
+        <i class="fa-solid fa-car-side"></i>
+        <span>Vehicles</span>
+    </a>
+
+    <a class="nav-link{% if current == 'reservation_page' %} active{% endif %}" href="{% url 'reservation_page' %}">
+        <i class="fa-solid fa-calendar-check"></i>
+        <span>Reservations</span>
+    </a>
+
+    <a class="nav-link{% if current == 'finance_page' %} active{% endif %}" href="{% url 'finance_page' %}">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Finance</span>
+    </a>
+
+    <a class="nav-link{% if current == 'index' %} active{% endif %}" href="{% url 'index' %}">
+        <i class="fa-solid fa-house"></i>
+        <span>Index</span>
+    </a>
+  
+    <div class="nav-section">Administration</div>
+    
+    <a class="nav-link logout-link" href="{% url 'logout' %}">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Logout</span>
+    </a>
+    {% endwith %}
+  </nav>
+
+</aside>

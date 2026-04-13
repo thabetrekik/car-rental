@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserve {{ vehicle.brand }} {{ vehicle.model }}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/reservation_details.css' %}">
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-title">Car Rental</div>
+                
+            </div>
+
+            <nav class="main-nav" aria-label="Reservation navigation">
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'cars' %}">Cars</a>
+                <a href="{% url 'workflow' %}">Workflow</a>
+                <a class="active" href="{% url 'reservation' vehicle.id %}">Reservation</a>
+                <a href="{% url 'reservation_history' %}">Reservations</a>
+            </nav>
+
+            <div class="topbar-actions">
+                <button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle theme">
+                    <i class="fa-solid fa-moon"></i>
+                    
+                </button>
+                {% if user.is_authenticated %}
+                    <span class="user-pill"><i class="fa-solid fa-user"></i> {{ user.username }}</span>
+                    <a class="btn-outline" href="{% url 'logout' %}">Log out</a>
+                {% else %}
+                    <a class="btn-outline" href="{% url 'login' %}">Log in</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <main>
+            {% if messages %}
+                <section class="flash-list" aria-label="Messages">
+                    {% for message in messages %}
+                        <div class="flash {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+
+            <section class="layout">
+                <article class="car-summary card">
+                    <h1>{{ vehicle.brand }} {{ vehicle.model }}</h1>
+                    <p class="muted">Pick your dates to send a reservation request for admin approval.</p>
+
+                    <div class="summary-content">
+                        <div class="summary-photo">
+                            {% if vehicle.photo %}
+                                <img src="{{ vehicle.photo.url }}" alt="{{ vehicle.brand }} {{ vehicle.model }}">
+                            {% else %}
+                                <div class="car-placeholder">
+                                    <i class="fa-solid fa-car-side"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <dl class="summary-grid">
+                            <div>
+                                <dt>Year</dt>
+                                <dd>{{ vehicle.year }}</dd>
+                            </div>
+                            <div>
+                                <dt>Category</dt>
+                                <dd>{{ vehicle.category }}</dd>
+                            </div>
+                            <div>
+                                <dt>Fuel</dt>
+                                <dd>{{ vehicle.fuel_type }}</dd>
+                            </div>
+                            <div>
+                                <dt>Mileage</dt>
+                                <dd>{{ vehicle.mileage }} km</dd>
+                            </div>
+                            <div>
+                                <dt>Status</dt>
+                                <dd>{{ vehicle.status }}</dd>
+                            </div>
+                            <div>
+                                <dt>Daily price</dt>
+                                <dd id="dailyPriceText">${{ vehicle.daily_price|floatformat:0 }} / day</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h2>Create reservation</h2>
+
+                    <form method="post" class="reservation-form" id="reservationForm">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="error-list">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="field-grid">
+                            <label>
+                                {{ form.start_date.label }}
+                                {{ form.start_date }}
+                                {% if form.start_date.errors %}
+                                    <span class="field-error">{{ form.start_date.errors|striptags }}</span>
+                                {% endif %}
+                            </label>
+                            <label>
+                                {{ form.end_date.label }}
+                                {{ form.end_date }}
+                                {% if form.end_date.errors %}
+                                    <span class="field-error">{{ form.end_date.errors|striptags }}</span>
+                                {% endif %}
+                            </label>
+                            <div class="full muted">
+                                Payment status is set to pending now and changes to paid automatically when the payment is recorded.
+                            </div>
+                        </div>
+
+                        <div class="quote-box" aria-live="polite">
+                            <div>
+                                <span>Number of days</span>
+                                <strong id="quoteDays">0</strong>
+                            </div>
+                            <div>
+                                <span>Estimated total</span>
+                                <strong id="quoteTotal">$0</strong>
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <a class="btn-secondary" href="{% url 'car_detail' vehicle.id %}">Back to car</a>
+                            <button class="btn-primary" type="submit">Send reservation request</button>
+                        </div>
+                    </form>
+                </article>
+
+                {% if created_reservation %}
+                    <article class="card confirmation">
+                        <h2>Reservation request sent</h2>
+                        <p>Your reservation request has been saved and is waiting for admin approval.</p>
+                        <dl class="confirm-grid">
+                            <div>
+                                <dt>Reservation ID</dt>
+                                <dd>#{{ created_reservation.id }}</dd>
+                            </div>
+                            <div>
+                                <dt>Status</dt>
+                                <dd>{{ created_reservation.status|title }}</dd>
+                            </div>
+                            <div>
+                                <dt>Start date</dt>
+                                <dd>{{ created_reservation.start_date }}</dd>
+                            </div>
+                            <div>
+                                <dt>End date</dt>
+                                <dd>{{ created_reservation.end_date }}</dd>
+                            </div>
+                            <div>
+                                <dt>Number of days</dt>
+                                <dd>{{ created_reservation.number_of_days }}</dd>
+                            </div>
+                            <div>
+                                <dt>Total price</dt>
+                                <dd>${{ created_reservation.total_price|floatformat:0 }}</dd>
+                            </div>
+                            <div>
+                                <dt>Payment status</dt>
+                                <dd>{{ created_reservation.payment_status }}</dd>
+                            </div>
+                        </dl>
+                    </article>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+
+    <script src="{% static 'js/site_theme.js' %}"></script>
+    <script>
+        (function () {
+            const startInput = document.getElementById("id_start_date");
+            const endInput = document.getElementById("id_end_date");
+            const quoteDays = document.getElementById("quoteDays");
+            const quoteTotal = document.getElementById("quoteTotal");
+            const dailyPrice = parseFloat("{{ vehicle.daily_price|floatformat:2 }}".replace(",", "."));
+
+            function updateQuote() {
+                if (!startInput.value || !endInput.value) {
+                    quoteDays.textContent = "0";
+                    quoteTotal.textContent = "$0";
+                    return;
+                }
+
+                const startDate = new Date(startInput.value + "T00:00:00");
+                const endDate = new Date(endInput.value + "T00:00:00");
+                const diffMs = endDate - startDate;
+                const days = Math.floor(diffMs / 86400000) + 1;
+
+                if (days <= 0) {
+                    quoteDays.textContent = "0";
+                    quoteTotal.textContent = "$0";
+                    return;
+                }
+
+                quoteDays.textContent = String(days);
+                quoteTotal.textContent = "$" + (dailyPrice * days).toFixed(0);
+            }
+
+            startInput.addEventListener("change", updateQuote);
+            endInput.addEventListener("change", updateQuote);
+            updateQuote();
+        })();
+    </script>
+</body>
+</html>

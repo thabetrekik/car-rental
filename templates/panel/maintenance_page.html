@@ -1,0 +1,190 @@
+{% extends 'panel/admin_panel.html' %}
+
+{% block title %}Maintenance | Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .section-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(244, 179, 97, 0.18);
+    border: 1px solid rgba(244, 179, 97, 0.4);
+    color: var(--accent-strong);
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .maintenance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .maintenance-card {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .maintenance-title {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .maintenance-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .maintenance-desc {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .status-badge {
+    width: fit-content;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .status-badge.maintaining {
+    color: #ffe2c0;
+    background: rgba(210, 145, 34, 0.2);
+    border-color: rgba(210, 145, 34, 0.45);
+  }
+
+  .status-badge.useable {
+    color: #c8ffd7;
+    background: rgba(36, 166, 96, 0.18);
+    border-color: rgba(36, 166, 96, 0.45);
+  }
+
+  .status-badge.used {
+    color: #c8ffd7;
+    background: rgba(36, 166, 96, 0.18);
+    border-color: rgba(36, 166, 96, 0.45);
+  }
+
+  .status-badge.not_used {
+    color: #ffe2c0;
+    background: rgba(210, 145, 34, 0.2);
+    border-color: rgba(210, 145, 34, 0.45);
+  }
+
+  .maintenance-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .btn-danger {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255, 119, 119, 0.4);
+    background: rgba(255, 94, 94, 0.2);
+    color: #ffd9d9;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+  }
+
+  .empty-state {
+    margin: 0;
+    color: var(--muted);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header">
+    <div>
+      <h1><i class="fa-solid fa-screwdriver-wrench"></i> Maintenance</h1>
+      <p>Add maintenance records and mark each vehicle as maintaining or useable.</p>
+    </div>
+    <div class="header-pill">Maintenance</div>
+  </header>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <section class="panel-card">
+    {% include 'includes/maintenance_form.html' with force_active=True %}
+  </section>
+
+  <section class="panel-card">
+    <div class="section-header">
+      <h2>Maintenance History</h2>
+      <span class="badge">{{ maintenances|length }} records</span>
+    </div>
+
+    {% if maintenances %}
+      <div class="maintenance-grid">
+        {% for maintenance in maintenances %}
+          <article class="maintenance-card">
+            <div class="maintenance-title">{{ maintenance.vehicle.brand }} {{ maintenance.vehicle.model }}</div>
+            <div class="maintenance-meta">
+              <span>{{ maintenance.date }}</span>
+              <span>{{ maintenance.maintenance_type }}</span>
+              <span>${{ maintenance.cost }}</span>
+            </div>
+            <span class="status-badge {{ maintenance.status }}">{{ maintenance.status }}</span>
+            <p class="maintenance-desc">{{ maintenance.description }}</p>
+            <div class="maintenance-actions">
+              <form method="post" action="{% url 'maintenance_delete' maintenance.id %}" onsubmit="return confirm('Delete this maintenance record?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger">
+                  <i class="fa-solid fa-trash"></i> Delete
+                </button>
+              </form>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-state">No maintenance records yet. Add the first one above.</p>
+    {% endif %}
+  </section>
+{% endblock %}
