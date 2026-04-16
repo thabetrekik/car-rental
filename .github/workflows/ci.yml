@@ -1,49 +1,11 @@
-name: Django CI/CD
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_DATABASE: car_rental
-          MYSQL_USER: admin
-          MYSQL_PASSWORD: admin
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -uadmin -padmin"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install dependencies
+    - name: Run Django server
       run: |
-        pip install -r requirements.txt
+        python manage.py runserver 0.0.0.0:8000 &
+        sleep 10
 
-    - name: Run migrations
+    - name: OWASP ZAP Scan
       run: |
-        python manage.py migrate
-
-    - name: Run Django checks
-      run: |
-        python manage.py check
-
-    - name: Build Docker image
-      run: docker build -t car_rental .
+        docker run --rm \
+          -v $(pwd):/zap/wrk:rw \
+          ghcr.io/zaproxy/zaproxy:stable \
+          zap-baseline.py -t http://127.0.0.1:8000 -r zap_report.html
