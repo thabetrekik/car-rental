@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-o9iv&(-_+$k=vk8b*9r&g+lp!-zp$7epk7%%-u7(d@-bq(u*74
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0').split(',') if host.strip()]
+ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0,host.docker.internal').split(',') if host.strip()]
 
 # Application definition
 INSTALLED_APPS = [
@@ -112,3 +112,4 @@ AUTH_USER_MODEL = 'accounts.User'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
+

@@ -16,7 +16,7 @@ services:
       MYSQL_PASSWORD: admin
       MYSQL_HOST: db
       MYSQL_PORT: "3306"
-      DJANGO_ALLOWED_HOSTS: 127.0.0.1,localhost,0.0.0.0
+      DJANGO_ALLOWED_HOSTS: 127.0.0.1,localhost,0.0.0.0,host.docker.internal
     depends_on:
       db:
         condition: service_healthy
