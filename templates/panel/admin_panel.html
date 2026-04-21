@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}?v=past3" />
     {% block extra_css %}{% endblock %}
 
     
@@ -70,3 +70,6 @@
     {% block extra_js %}{% endblock %}
 </body>
 </html>
+
+
+

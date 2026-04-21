@@ -1,4 +1,4 @@
-
+﻿
 
 /* Extracted from panel/client_edit.html */
 .btn-ghost {
@@ -872,3 +872,125 @@
 .edit-back-actions {
   margin-top: 16px;
 }
+
+/* Dashboard form panels */
+.form-wrapper {
+  position: relative;
+}
+
+.form-section {
+  display: none;
+  animation: form-fade 0.28s ease;
+}
+
+.form-section.active {
+  display: block;
+}
+
+.form {
+  display: grid;
+  gap: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 16px 18px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field label {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.field input,
+.field select,
+.field textarea,
+.field-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(7, 12, 22, 0.72);
+  color: white;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.field textarea {
+  min-height: 118px;
+  resize: vertical;
+}
+
+.field input[type="file"] {
+  padding: 10px 12px;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus,
+.field-input:focus {
+  border-color: rgba(109, 213, 237, 0.68);
+  background: rgba(11, 18, 31, 0.88);
+  box-shadow: 0 0 0 3px rgba(109, 213, 237, 0.16);
+}
+
+.field:has(textarea),
+.field:has(input[type="file"]) {
+  grid-column: 1 / -1;
+}
+
+.field-error {
+  color: #ff9f9f;
+  font-size: 0.78rem;
+}
+
+.btn-primary {
+  width: fit-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  color: #08111f;
+  background: linear-gradient(135deg, #6dd5ed, #a7f3ff);
+  box-shadow: 0 14px 28px rgba(109, 213, 237, 0.18);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 34px rgba(109, 213, 237, 0.24);
+}
+
+@keyframes form-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 760px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
