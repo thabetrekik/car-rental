@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'csp',
 ]
 
 MIDDLEWARE = [
@@ -35,6 +36,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'car_rental.urls'
@@ -113,3 +115,28 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
 
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ("'self'",),
+        "style-src": (
+            "'self'",
+            "https://fonts.googleapis.com",
+            "https://cdnjs.cloudflare.com",
+        ),
+        "font-src": (
+            "'self'",
+            "https://fonts.gstatic.com",
+            "https://cdnjs.cloudflare.com",
+        ),
+        "script-src": (
+            "'self'",
+            "https://cdnjs.cloudflare.com",
+        ),
+        "img-src": (
+            "'self'",
+            "data:",
+            "https://images.unsplash.com",
+        ),
+        "connect-src": ("'self'",),
+    }
+}

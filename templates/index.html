@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="icon" href="{% static 'img/favicon.ico' %}">
 </head>
 <body>
     <div class="page">
@@ -46,7 +47,7 @@
 
         <main class="home-main">
             <section class="hero-panel hero-panel--car-bg" id="index">
-                <div class="hero-copy hero-copy--car-bg" style="--hero-image: url('/media/vehicles/porsche-911-gt3-rs-03.jpg');">
+                <div class="hero-copy hero-copy--car-bg hero-copy--porsche-bg">
                     <div class="hero-actions">
                         <a class="btn-primary" href="{% url 'cars' %}">Browse cars</a>
                         <a class="btn-outline btn-ghost" href="{% url 'workflow' %}">How it works</a>

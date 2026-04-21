@@ -1,0 +1,441 @@
+
+
+/* Extracted from panel/finance_page.html */
+.header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 35px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .header h1 i {
+        color: #6dd5ed;
+        filter: drop-shadow(0 0 10px rgba(109, 213, 237, 0.5));
+    }
+
+    .header-pill {
+        background: rgba(109, 213, 237, 0.15);
+        border: 1px solid rgba(109, 213, 237, 0.4);
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        letter-spacing: 1px;
+        color: #6dd5ed;
+    }
+
+    .message-stack {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .message {
+        border-radius: 14px;
+        padding: 14px 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .message.success {
+        border-color: rgba(126, 240, 168, 0.35);
+        background: rgba(126, 240, 168, 0.12);
+    }
+
+    .message.error {
+        border-color: rgba(255, 120, 120, 0.35);
+        background: rgba(255, 120, 120, 0.12);
+    }
+
+    .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+        font-size: 1.2rem;
+        margin-bottom: 6px;
+    }
+
+    .section-head p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .management-grid,
+    .finance-grid,
+    .deposit-summary-grid,
+    .roi-grid {
+        display: grid;
+        gap: 20px;
+    }
+
+    .management-grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        margin-bottom: 34px;
+    }
+
+    .finance-grid,
+    .roi-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .deposit-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 18px;
+    }
+
+    .panel-card,
+    .finance-card,
+    .deposit-summary-card,
+    .deposit-row,
+    .roi-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    .panel-card,
+    .finance-card,
+    .roi-card,
+    .deposit-row {
+        padding: 22px;
+    }
+
+    .panel-card {
+        display: grid;
+        gap: 18px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .form-field {
+        display: grid;
+        gap: 8px;
+    }
+
+    .form-field label {
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.88);
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(9, 14, 27, 0.68);
+        color: white;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+
+    .form-field textarea {
+        min-height: 96px;
+        resize: vertical;
+    }
+
+    .form-field--full {
+        grid-column: 1 / -1;
+    }
+
+    .field-help {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.56);
+    }
+
+    .search-field {
+        margin-bottom: 10px;
+    }
+
+    .field-error {
+        color: #ff9f9f;
+        font-size: 0.8rem;
+    }
+
+    .primary-button,
+    .secondary-button {
+        border: none;
+        border-radius: 14px;
+        padding: 12px 18px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .primary-button {
+        color: #08111f;
+        background: linear-gradient(135deg, #6dd5ed 0%, #a7f3ff 100%);
+        box-shadow: 0 12px 24px rgba(109, 213, 237, 0.22);
+    }
+
+    .secondary-button {
+        color: white;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .deposit-summary-card {
+        padding: 18px;
+        display: grid;
+        gap: 6px;
+    }
+
+    .deposit-summary-card span {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .deposit-summary-card strong {
+        font-size: 1.2rem;
+    }
+
+    .deposit-summary-card p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.9rem;
+    }
+
+    .status-badge {
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        white-space: nowrap;
+    }
+
+    .status-badge--pending {
+        color: #f7d777;
+        background: rgba(247, 215, 119, 0.12);
+        border-color: rgba(247, 215, 119, 0.28);
+    }
+
+    .status-badge--returned {
+        color: #7ef0a8;
+        background: rgba(126, 240, 168, 0.12);
+        border-color: rgba(126, 240, 168, 0.28);
+    }
+
+    .status-badge--cashed {
+        color: #ff9f9f;
+        background: rgba(255, 120, 120, 0.12);
+        border-color: rgba(255, 120, 120, 0.28);
+    }
+
+    .status-badge--info {
+        color: #6dd5ed;
+        background: rgba(109, 213, 237, 0.12);
+        border-color: rgba(109, 213, 237, 0.28);
+    }
+
+    .deposit-list {
+        display: grid;
+        gap: 16px;
+    }
+
+    .deposit-row {
+        display: grid;
+        gap: 16px;
+    }
+
+    .deposit-row-head,
+    .finance-card-head,
+    .roi-card-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: flex-start;
+    }
+
+    .deposit-row-head h3,
+    .finance-card-head h3,
+    .roi-card-head h3 {
+        margin-bottom: 4px;
+    }
+
+    .deposit-row-head p,
+    .finance-card-head p,
+    .roi-card-head p {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 0.84rem;
+    }
+
+    .deposit-meta,
+    .roi-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        color: rgba(255, 255, 255, 0.66);
+        font-size: 0.84rem;
+    }
+
+    .deposit-meta span,
+    .roi-meta span {
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .deposit-status-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .deposit-status-form select {
+        min-width: 170px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(9, 14, 27, 0.68);
+        color: white;
+        padding: 11px 12px;
+    }
+
+    .finance-card {
+        display: grid;
+        gap: 16px;
+    }
+
+    .finance-pill {
+        border-radius: 999px;
+        padding: 6px 12px;
+        background: rgba(109, 213, 237, 0.12);
+        border: 1px solid rgba(109, 213, 237, 0.3);
+        color: #6dd5ed;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .finance-metrics,
+    .roi-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .finance-metric,
+    .roi-metric {
+        border-radius: 14px;
+        padding: 12px;
+        display: grid;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .finance-metric span,
+    .roi-metric span {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .finance-metric strong,
+    .roi-metric strong {
+        font-size: 1.05rem;
+        color: white;
+    }
+
+    .finance-metric--in strong,
+    .roi-metric--income strong { color: #6dd5ed; }
+
+    .finance-metric--out strong,
+    .roi-metric--expenses strong { color: #ff9f68; }
+
+    .finance-metric--net strong,
+    .roi-metric--net strong { color: #ffffff; }
+
+    .finance-breakdown {
+        display: grid;
+        gap: 10px;
+    }
+
+    .finance-breakdown h4 {
+        font-size: 0.92rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .finance-breakdown ul {
+        list-style: none;
+        display: grid;
+        gap: 8px;
+        padding: 0;
+        margin: 0;
+    }
+
+    .finance-breakdown li {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 0.85rem;
+    }
+
+    .finance-note {
+        margin-top: 18px;
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    .roi-section {
+        margin-top: 38px;
+    }
+
+    .roi-card {
+        display: grid;
+        gap: 14px;
+    }
+
+    @media (max-width: 980px) {
+        .management-grid,
+        .deposit-summary-grid,
+        .finance-metrics,
+        .roi-metrics,
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+/* CSP finance helpers */
+.section-head--flush {
+  margin-bottom: 0;
+}
+
+.finance-section-spaced {
+  margin-bottom: 34px;
+}
+
+.finance-note--compact {
+  margin-top: 0;
+}

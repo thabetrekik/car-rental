@@ -1155,3 +1155,8 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* CSP hero background class */
+.hero-copy--porsche-bg {
+  --hero-image: url('/media/vehicles/porsche-911-gt3-rs-03.jpg');
+}
