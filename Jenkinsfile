@@ -23,7 +23,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'docker compose run --rm -w /app web python manage.py test'
+                sh 'docker compose run --rm -w /app web sh -c "ls -la /app && python manage.py test"'
             }
         }
 
