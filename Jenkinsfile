@@ -11,7 +11,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git url: "https://github.com/thabetrekik/car-rental.git", credentialsId: 'github-token', branch: 'main'
+                git url: "${GITHUB_REPO}", credentialsId: 'github-token', branch: 'main'
             }
         }
 
@@ -29,7 +29,7 @@ pipeline {
 
         stage('Apply Migrations') {
             steps {
-                sh 'docker compose run --rm web python manage.py migrate'
+                sh 'docker compose run --rm web python wait_for_db.py'
             }
         }
 
@@ -37,12 +37,11 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONARQUBE_SERVER}") {
                     sh '''
-                        docker compose run --rm web \
                         sonar-scanner \
-                        -Dsonar.projectKey=Car-Rental \
+                        -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=http://sonarqube:9000 \
-                        -Dsonar.login=squ_7e27e2fae5ba66c1b611df923199a156e4ea290d
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=squ_058020ffdc48cb80fbf1d2b2ca945ee23bb327a4
                     '''
                 }
             }
@@ -69,12 +68,20 @@ pipeline {
                 sh 'docker compose up -d web nginx'
             }
         }
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
+                }
+            }
+}
+
     }
+
 
     post {
         always {
             echo 'Pipeline finished'
-            archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
         }
         success {
             echo '✅ Deployment successful!'
