@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Payment | Car Rental</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="{% static 'css/client_portal.css' %}">
+    <link rel="icon" href="{% static 'img/favicon.ico' %}">
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-copy">
+                    <div class="brand-title">Car Rental</div>
+                </div>
+            </div>
+
+            <nav class="main-nav" aria-label="Payment navigation">
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'cars' %}">Cars</a>
+                <a href="{% url 'workflow' %}">Workflow</a>
+                <a href="{% url 'reservation_history' %}">Reservations</a>
+                <a href="{% url 'client_documents' %}">Documents</a>
+            </nav>
+
+            <div class="topbar-actions">
+                <button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <span class="user-pill"><i class="fa-solid fa-user"></i> {{ user.username }}</span>
+                <a class="btn-outline" href="{% url 'logout' %}">Log out</a>
+            </div>
+        </header>
+
+        <main class="home-main">
+            {% if messages %}
+                <section class="flash-list" aria-label="Messages">
+                    {% for message in messages %}
+                        <div class="flash {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+
+            <section class="section portal-section">
+                <div class="section-head">
+                    <h2>Online payment</h2>
+                    <p>Complete payment for reservation #{{ reservation.id }}.</p>
+                </div>
+
+                <div class="portal-grid">
+                    <article class="portal-summary">
+                        <div class="portal-icon"><i class="fa-solid fa-credit-card"></i></div>
+                        <h3>{{ reservation.vehicle.brand }} {{ reservation.vehicle.model }}</h3>
+                        <dl class="portal-details">
+                            <div>
+                                <dt>Period</dt>
+                                <dd>{{ reservation.start_date }} to {{ reservation.end_date }}</dd>
+                            </div>
+                            <div>
+                                <dt>Total</dt>
+                                <dd>${{ reservation.total_price|floatformat:2 }}</dd>
+                            </div>
+                            <div>
+                                <dt>Status</dt>
+                                <dd>{{ reservation.status|title }}</dd>
+                            </div>
+                            <div>
+                                <dt>Payment</dt>
+                                <dd>{{ reservation.payment_status|title }}</dd>
+                            </div>
+                        </dl>
+                    </article>
+
+                    <article class="portal-card">
+                        <form method="post" class="portal-form">
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="form-error">{{ form.non_field_errors|striptags }}</div>
+                            {% endif %}
+
+                            <label>
+                                {{ form.card_holder.label }}
+                                {{ form.card_holder }}
+                                {% if form.card_holder.errors %}<span>{{ form.card_holder.errors|striptags }}</span>{% endif %}
+                            </label>
+
+                            <label>
+                                {{ form.card_number.label }}
+                                {{ form.card_number }}
+                                {% if form.card_number.errors %}<span>{{ form.card_number.errors|striptags }}</span>{% endif %}
+                            </label>
+
+                            <div class="portal-form-row">
+                                <label>
+                                    {{ form.expiry_month.label }}
+                                    {{ form.expiry_month }}
+                                    {% if form.expiry_month.errors %}<span>{{ form.expiry_month.errors|striptags }}</span>{% endif %}
+                                </label>
+                                <label>
+                                    {{ form.expiry_year.label }}
+                                    {{ form.expiry_year }}
+                                    {% if form.expiry_year.errors %}<span>{{ form.expiry_year.errors|striptags }}</span>{% endif %}
+                                </label>
+                                <label>
+                                    {{ form.cvv.label }}
+                                    {{ form.cvv }}
+                                    {% if form.cvv.errors %}<span>{{ form.cvv.errors|striptags }}</span>{% endif %}
+                                </label>
+                            </div>
+
+                            <div class="portal-actions">
+                                <a class="btn-outline" href="{% url 'reservation_history' %}">Cancel</a>
+                                <button class="btn-primary" type="submit">Pay ${{ reservation.total_price|floatformat:2 }}</button>
+                            </div>
+                        </form>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{% static 'js/site_theme.js' %}"></script>
+</body>
+</html>

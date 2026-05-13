@@ -25,6 +25,9 @@
                 <a href="{% url 'workflow' %}">Workflow</a>
                 <a class="active" href="{% url 'reservation' vehicle.id %}">Reservation</a>
                 <a href="{% url 'reservation_history' %}">Reservations</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'client_documents' %}">Documents</a>
+                {% endif %}
             </nav>
 
             <div class="topbar-actions">
@@ -124,8 +127,15 @@
                                     <span class="field-error">{{ form.end_date.errors|striptags }}</span>
                                 {% endif %}
                             </label>
+                            <label class="full payment-choice">
+                                {{ form.payment_method.label }}
+                                <span class="payment-options">{{ form.payment_method }}</span>
+                                {% if form.payment_method.errors %}
+                                    <span class="field-error">{{ form.payment_method.errors|striptags }}</span>
+                                {% endif %}
+                            </label>
                             <div class="full muted">
-                                Payment status is set to pending now and changes to paid automatically when the payment is recorded.
+                                Online payment opens a secure payment page and marks the reservation as paid automatically.
                             </div>
                         </div>
 
@@ -151,6 +161,11 @@
                     <article class="card confirmation">
                         <h2>Reservation request sent</h2>
                         <p>Your reservation request has been saved and is waiting for admin approval.</p>
+                        {% if not created_reservation.is_paid %}
+                            <div class="actions">
+                                <a class="btn-primary" href="{% url 'online_payment' created_reservation.id %}">Pay online now</a>
+                            </div>
+                        {% endif %}
                         <dl class="confirm-grid">
                             <div>
                                 <dt>Reservation ID</dt>

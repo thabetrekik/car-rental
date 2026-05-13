@@ -392,6 +392,45 @@ main {
   box-shadow: 0 0 0 2px rgba(47, 123, 232, 0.18);
 }
 
+.payment-choice {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  padding: 10px;
+}
+
+.payment-options ul {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.payment-options li label {
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  color: var(--text);
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.payment-options li label:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.payment-options input {
+  width: auto;
+  accent-color: var(--accent);
+}
+
 .field-error {
   color: var(--danger);
   font-size: 0.72rem;
@@ -528,7 +567,8 @@ main {
   .field-grid,
   .summary-grid,
   .quote-box,
-  .confirm-grid {
+  .confirm-grid,
+  .payment-options ul {
     grid-template-columns: 1fr;
   }
 }

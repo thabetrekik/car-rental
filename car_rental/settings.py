@@ -14,6 +14,14 @@ SECRET_KEY = 'django-insecure-o9iv&(-_+$k=vk8b*9r&g+lp!-zp$7epk7%%-u7(d@-bq(u*74
 DEBUG = True
 
 ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0,host.docker.internal').split(',') if host.strip()]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "DJANGO_CSRF_TRUSTED_ORIGINS",
+        "http://127.0.0.1:8000,http://localhost:8000,http://host.docker.internal:8000",
+    ).split(",")
+    if origin.strip()
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -72,7 +80,6 @@ DATABASES = {
         'PORT': MYSQL_PORT,
     }
 }
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -112,7 +119,8 @@ AUTH_USER_MODEL = 'accounts.User'
 
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 X_FRAME_OPTIONS = 'DENY'
 
 CONTENT_SECURITY_POLICY = {

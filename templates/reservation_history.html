@@ -25,6 +25,7 @@
                 <a href="{% url 'cars' %}">Cars</a>
                 <a href="{% url 'workflow' %}">Workflow</a>
                 <a class="active" href="{% url 'reservation_history' %}">Reservations</a>
+                <a href="{% url 'client_documents' %}">Documents</a>
             </nav>
 
             <div class="topbar-actions">
@@ -98,6 +99,13 @@
                                                     <dd>#{{ reservation.id }}</dd>
                                                 </div>
                                             </dl>
+                                            {% if not reservation.is_paid %}
+                                                <div class="reservation-card-actions">
+                                                    <a class="reservation-pay-link" href="{% url 'online_payment' reservation.id %}">
+                                                        <i class="fa-solid fa-credit-card"></i> Pay online
+                                                    </a>
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     </article>
                                 {% endfor %}
@@ -161,6 +169,13 @@
                                                     <dd>#{{ reservation.id }}</dd>
                                                 </div>
                                             </dl>
+                                            {% if not reservation.is_paid %}
+                                                <div class="reservation-card-actions">
+                                                    <a class="reservation-pay-link" href="{% url 'online_payment' reservation.id %}">
+                                                        <i class="fa-solid fa-credit-card"></i> Pay online
+                                                    </a>
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     </article>
                                 {% endfor %}

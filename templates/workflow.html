@@ -25,6 +25,9 @@
                 <a href="{% url 'cars' %}">Cars</a>
                 <a class="active" href="{% url 'workflow' %}">Workflow</a>
                 <a href="{% url 'reservation_history' %}">Reservations</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'client_documents' %}">Documents</a>
+                {% endif %}
             </nav>
 
             <div class="topbar-actions">
@@ -34,6 +37,9 @@
                 {% if user.is_authenticated %}
                     <a class="header-icon-link" href="{% url 'reservation_history' %}" aria-label="Reservation history" title="Reservation history">
                         <i class="fa-solid fa-clock-rotate-left"></i>
+                    </a>
+                    <a class="header-icon-link" href="{% url 'client_documents' %}" aria-label="Client documents" title="Client documents">
+                        <i class="fa-solid fa-id-card"></i>
                     </a>
                     <span class="user-pill"><i class="fa-solid fa-user"></i> {{ user.username }}</span>
                     <a class="btn-outline" href="{% url 'logout' %}">Log out</a>

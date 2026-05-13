@@ -56,6 +56,14 @@ FIXED_CHARGE_STATUS_CHOICES = [
     (FIXED_CHARGE_COMPLETED, "Completed"),
 ]
 
+DOCUMENT_CIN = "cin"
+DOCUMENT_DRIVING_LICENSE = "driving_license"
+
+DOCUMENT_TYPE_CHOICES = [
+    (DOCUMENT_CIN, "CIN"),
+    (DOCUMENT_DRIVING_LICENSE, "Driving Licence"),
+]
+
 
 class User(AbstractUser):
     role = models.CharField(max_length=50, blank=True, null=True)
@@ -107,6 +115,10 @@ class Reservation(models.Model):
 
     class Meta:
         db_table = "reservation"
+
+    @property
+    def is_paid(self):
+        return (self.payment_status or "").strip().lower() == "paid"
 
 
 def sync_reservation_statuses():
@@ -196,5 +208,9 @@ class FixedChargeAlert(models.Model):
 
 class Document(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    document_type = models.CharField(max_length=30, choices=DOCUMENT_TYPE_CHOICES, default=DOCUMENT_CIN)
     file = models.FileField(upload_to="documents/", db_column="fichier")
     uploaded_at = models.DateTimeField(auto_now_add=True, db_column="date_upload")
+
+    def __str__(self):
+        return f"{self.client} - {self.get_document_type_display()}"

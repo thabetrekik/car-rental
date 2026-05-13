@@ -5,7 +5,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Count, Sum
+from django.db.models import Count, Prefetch, Sum
 from django.db.models.deletion import RestrictedError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -19,6 +19,7 @@ from accounts.models import (
     DEPOSIT_RETURNED,
     DEPOSIT_STATUS_CHOICES,
     Deposit,
+    Document,
     Expense,
     FIXED_CHARGE_COMPLETED,
     FIXED_CHARGE_PENDING,
@@ -36,7 +37,9 @@ from .forms import ClientCreateForm, ClientUpdateForm, DepositForm, ExpenseForm,
 
 
 def _is_admin(user):
-    return user.is_staff or getattr(user, "role", "") == "admin"
+    username = (getattr(user, "username", "") or "").strip().lower()
+    role = (getattr(user, "role", "") or "").strip().lower()
+    return bool(user and user.is_authenticated and (user.is_staff or role == "admin" or username == "admin"))
 
 
 FINANCE_EXPENSE_CATEGORIES = [
@@ -529,7 +532,17 @@ def client_page(request):
         return redirect("login")
 
     client_form = ClientCreateForm()
-    clients = Client.objects.select_related("user").order_by("-id")
+    clients = (
+        Client.objects.select_related("user")
+        .prefetch_related(
+            Prefetch(
+                "document_set",
+                queryset=Document.objects.order_by("-uploaded_at", "-id"),
+                to_attr="uploaded_documents",
+            )
+        )
+        .order_by("-id")
+    )
     if request.method == "POST":
         client_form = ClientCreateForm(request.POST)
         if client_form.is_valid():
@@ -653,8 +666,9 @@ def client_edit(request, client_id):
     if not _is_admin(request.user):
         return redirect("login")
 
-    client = get_object_or_404(Client, pk=client_id)
+    client = get_object_or_404(Client.objects.select_related("user"), pk=client_id)
     client_form = ClientUpdateForm(instance=client)
+    client_documents = Document.objects.filter(client=client).order_by("-uploaded_at", "-id")
 
     if request.method == "POST":
         client_form = ClientUpdateForm(request.POST, instance=client)
@@ -669,7 +683,7 @@ def client_edit(request, client_id):
         else:
             messages.error(request, "Please fix the client form errors.")
 
-    context = {"client_form": client_form, "client": client}
+    context = {"client_form": client_form, "client": client, "client_documents": client_documents}
     return render(request, "panel/client_edit.html", context)
 
 

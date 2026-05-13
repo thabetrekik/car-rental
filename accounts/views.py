@@ -6,16 +6,25 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
-from .forms import RegistrationForm, ReservationDetailsForm
+from .forms import ClientDocumentForm, OnlinePaymentForm, RegistrationForm, ReservationDetailsForm
 from .models import (
     ACTIVE_RESERVATION_STATUSES,
     Client,
+    DOCUMENT_CIN,
+    DOCUMENT_DRIVING_LICENSE,
+    Document,
+    Payment,
     Reservation,
     RESERVATION_PENDING,
     User,
     Vehicle,
     sync_reservation_statuses,
 )
+
+def _is_admin_user(user):
+    username = (getattr(user, "username", "") or "").strip().lower()
+    role = (getattr(user, "role", "") or "").strip().lower()
+    return bool(user and user.is_authenticated and (user.is_staff or role == "admin" or username == "admin"))
 
 
 def _get_client_reservation_groups(client):
@@ -68,7 +77,7 @@ def register(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        if request.user.is_staff or getattr(request.user, "role", "") == "admin":
+        if _is_admin_user(request.user):
             return redirect("dashboard")
         return redirect("index")
 
@@ -83,7 +92,7 @@ def login_view(request):
             next_url = request.GET.get("next")
             if next_url:
                 return redirect(next_url)
-            if user.is_staff or getattr(user, "role", "") == "admin":
+            if _is_admin_user(user):
                 return redirect("dashboard")
             return redirect("index")
         messages.error(request, "Incorrect username or password.")
@@ -221,6 +230,9 @@ def reservation_page(request, vehicle_id):
                 number_of_days=form.cleaned_data["number_of_days"],
                 status=RESERVATION_PENDING,
             )
+            if form.cleaned_data["payment_method"] == ReservationDetailsForm.PAYMENT_METHOD_ONLINE:
+                messages.success(request, "Reservation request saved. Complete the online payment to mark it as paid.")
+                return redirect("online_payment", reservation_id=reservation.id)
             messages.success(request, "Reservation request sent successfully. Payment stays pending until it is recorded.")
             reservation_url = reverse("reservation", args=[vehicle.id])
             return redirect(f"{reservation_url}?created={reservation.id}")
@@ -244,3 +256,80 @@ def reservation_page(request, vehicle_id):
         "created_reservation": created_reservation,
     }
     return render(request, "reservation_details.html", context)
+
+
+def online_payment_page(request, reservation_id):
+    if not request.user.is_authenticated:
+        login_url = reverse("login")
+        return redirect(f"{login_url}?next={request.path}")
+
+    client = Client.objects.filter(user=request.user).first()
+    if not client:
+        messages.error(request, "Your account does not have a client profile yet.")
+        return redirect("index")
+
+    reservation = get_object_or_404(
+        Reservation.objects.select_related("vehicle", "client"),
+        pk=reservation_id,
+        client=client,
+    )
+
+    if reservation.is_paid:
+        messages.info(request, "This reservation is already paid.")
+        return redirect("reservation_history")
+
+    initial = {
+        "card_holder": f"{client.first_name} {client.last_name}".strip(),
+        "expiry_year": timezone.localdate().year,
+    }
+    form = OnlinePaymentForm(request.POST or None, initial=initial)
+
+    if request.method == "POST" and form.is_valid():
+        reference = f"ONLINE-{reservation.id}-{timezone.now().strftime('%Y%m%d%H%M%S')}"
+        Payment.objects.update_or_create(
+            reservation=reservation,
+            defaults={
+                "amount": reservation.total_price,
+                "method": "online",
+                "reference": reference,
+            },
+        )
+        messages.success(request, "Online payment completed. Your reservation is now marked as paid.")
+        return redirect("reservation_history")
+
+    return render(request, "online_payment.html", {"form": form, "reservation": reservation})
+
+
+def client_documents_page(request):
+    if not request.user.is_authenticated:
+        login_url = reverse("login")
+        return redirect(f"{login_url}?next={request.path}")
+
+    client = Client.objects.filter(user=request.user).first()
+    if not client:
+        messages.error(request, "Your account does not have a client profile yet.")
+        return redirect("index")
+
+    form = ClientDocumentForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        cin_file = form.cleaned_data.get("cin_file")
+        driving_license_file = form.cleaned_data.get("driving_license_file")
+
+        if cin_file:
+            Document.objects.create(client=client, document_type=DOCUMENT_CIN, file=cin_file)
+        if driving_license_file:
+            Document.objects.create(client=client, document_type=DOCUMENT_DRIVING_LICENSE, file=driving_license_file)
+
+        messages.success(request, "Documents uploaded successfully.")
+        return redirect("client_documents")
+
+    documents = Document.objects.filter(client=client).order_by("-uploaded_at", "-id")
+    return render(
+        request,
+        "client_documents.html",
+        {
+            "form": form,
+            "documents": documents,
+            "client_profile": client,
+        },
+    )

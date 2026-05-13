@@ -755,6 +755,33 @@ a {
   line-height: 1.4;
 }
 
+.reservation-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reservation-pay-link {
+  border: 1px solid rgba(90, 136, 215, 0.42);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 800;
+  transition: 0.2s ease;
+}
+
+.reservation-pay-link:hover {
+  transform: translateY(-1px);
+  background: var(--accent);
+  color: #fff;
+}
+
 .reservation-empty {
   color: var(--muted);
   font-size: 0.84rem;

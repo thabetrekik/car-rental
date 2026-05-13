@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Client, Maintenance, User
+from .models import Client, Document, Maintenance, Payment, User
 
 
 # 1. Admin configuration for CLIENT
@@ -35,3 +35,16 @@ class CustomUserAdmin(UserAdmin):
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Client)
 admin.site.register(Maintenance)
+
+
+@admin.register(Document)
+class DocumentAdmin(admin.ModelAdmin):
+    list_display = ("client", "document_type", "uploaded_at")
+    list_filter = ("document_type", "uploaded_at")
+    search_fields = ("client__first_name", "client__last_name", "client__email")
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ("reservation", "amount", "method", "payment_date", "reference")
+    search_fields = ("reference", "reservation__client__first_name", "reservation__client__last_name")

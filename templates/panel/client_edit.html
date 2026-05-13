@@ -3,7 +3,7 @@
 {% block title %}Edit Client | Admin{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/panel_pages.css?v=forms4">
+<link rel="stylesheet" href="/static/css/panel_pages.css?v=forms5">
 {% endblock %}
 
 {% block content %}
@@ -29,6 +29,39 @@
       <a class="btn-ghost" href="{% url 'client_page' %}">
         <i class="fa-solid fa-arrow-left"></i> Back to clients
       </a>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="section-header">
+      <h2>Client documents</h2>
+      <span class="badge">{{ client_documents|length }} files</span>
+    </div>
+    <div class="client-documents client-documents--wide">
+      <div class="client-documents-title">
+        <i class="fa-solid fa-folder-open"></i>
+        {{ client.last_name }} {{ client.first_name }}
+      </div>
+      <div class="client-meta">
+        <span><i class="fa-solid fa-user"></i> @{{ client.user.username }}</span>
+        <span><i class="fa-solid fa-envelope"></i> {{ client.email }}</span>
+        {% if client.phone %}
+          <span><i class="fa-solid fa-phone"></i> {{ client.phone }}</span>
+        {% endif %}
+      </div>
+      {% if client_documents %}
+        <div class="client-document-list client-document-list--wide">
+          {% for document in client_documents %}
+            <a class="client-document-link" href="{{ document.file.url }}" target="_blank" rel="noopener">
+              <i class="fa-solid fa-file-shield"></i>
+              <span>{{ document.get_document_type_display }}</span>
+              <small>{{ document.uploaded_at|date:"d/m/Y H:i" }}</small>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="client-document-empty">No CIN or driving licence uploaded yet.</p>
+      {% endif %}
     </div>
   </section>
 {% endblock %}

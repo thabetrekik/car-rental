@@ -23,6 +23,7 @@
 
 html,
 body {
+  margin: 0;
   min-height: 100%;
 }
 
@@ -33,7 +34,8 @@ body {
     radial-gradient(circle at 0% 0%, rgba(191, 111, 63, 0.22), transparent 34%),
     radial-gradient(circle at 100% 100%, rgba(24, 45, 59, 0.18), transparent 35%),
     linear-gradient(160deg, var(--bg) 0%, var(--bg-soft) 100%);
-  padding: 28px;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 body::before {
@@ -48,12 +50,13 @@ body::before {
 }
 
 .auth-layout {
-  max-width: 1060px;
-  margin: 0 auto;
-  min-height: calc(100vh - 56px);
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-height: 100vh;
   background: rgba(255, 255, 255, 0.58);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 28px;
+  border-radius: 0;
   overflow: hidden;
   display: grid;
   grid-template-columns: minmax(320px, 0.95fr) minmax(340px, 1.05fr);

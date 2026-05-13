@@ -3,7 +3,7 @@
 {% block title %}Clients | Admin{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/panel_pages.css?v=forms4">
+<link rel="stylesheet" href="/static/css/panel_pages.css?v=forms5">
 {% endblock %}
 
 {% block content %}
@@ -44,10 +44,29 @@
             </div>
             <div class="client-meta">
               {% if client.phone %}
-                <span>{{ client.phone }}</span>
+                <span><i class="fa-solid fa-phone"></i> {{ client.phone }}</span>
               {% endif %}
               {% if client.birth_date %}
-                <span>{{ client.birth_date }}</span>
+                <span><i class="fa-solid fa-calendar-days"></i> {{ client.birth_date }}</span>
+              {% endif %}
+            </div>
+            <div class="client-documents">
+              <div class="client-documents-title">
+                <i class="fa-solid fa-folder-open"></i>
+                Documents
+              </div>
+              {% if client.uploaded_documents %}
+                <div class="client-document-list">
+                  {% for document in client.uploaded_documents %}
+                    <a class="client-document-link" href="{{ document.file.url }}" target="_blank" rel="noopener">
+                      <i class="fa-solid fa-file-shield"></i>
+                      <span>{{ document.get_document_type_display }}</span>
+                      <small>{{ document.uploaded_at|date:"d/m/Y H:i" }}</small>
+                    </a>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="client-document-empty">No CIN or driving licence uploaded yet.</p>
               {% endif %}
             </div>
             <div class="client-actions">
