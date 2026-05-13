@@ -5,6 +5,13 @@ pipeline {
         SONAR_HOST_URL = 'http://sonarqube:9000'
     }
 
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
         stage('Build Containers') {
             steps {
@@ -26,9 +33,7 @@ pipeline {
 
         stage('SonarQube Scan') {
             steps {
-
                 withSonarQubeEnv('SonarQube') {
-
                     sh '''
                     docker run --rm \
                     --network car_rental_default \
@@ -36,8 +41,6 @@ pipeline {
                     sonarsource/sonar-scanner-cli:latest \
                     -Dsonar.projectKey=car-rental \
                     -Dsonar.sources=/usr/src \
-                    -Dsonar.python.version=3 \
-                    -Dsonar.scm.provider=git \
                     -Dsonar.host.url=http://sonarqube:9000 \
                     -Dsonar.login=squ_2da11ef8e1ce8ba43deb7d24492cd9a007e5f0be
                     '''
@@ -47,13 +50,10 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-
-                sh '''
-                docker compose down
-                docker compose up -d
-                '''
+                sh 'docker compose up -d'
             }
         }
+    }
 
     post {
         always {
