@@ -5,14 +5,6 @@ pipeline {
         SONAR_HOST_URL = 'http://sonarqube:9000'
     }
 
-    stages {
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/thabetrekik/car-rental.git'
-            }
-        }
 
         stage('Build Containers') {
             steps {
