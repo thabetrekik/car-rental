@@ -29,7 +29,7 @@ pipeline {
 
         stage('Apply Migrations') {
             steps {
-                sh 'docker compose run --rm web python wait_for_db.py'
+                sh 'docker compose run --rm web python scripts/wait_for_db.py'
             }
         }
 
