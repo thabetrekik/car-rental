@@ -2,6 +2,7 @@ services:
 
   web:
     build: .
+    image: car-rental-pipeline-web:latest
     working_dir: /app
     command: >
       sh -c "python manage.py migrate &&
