@@ -82,5 +82,6 @@ volumes:
 
 networks:
   car_rental_network:
-    name: car_rental_network   # ✅ force exact name
+    name: car_rental_network
+    external: true   
     driver: bridge
