@@ -25,4 +25,4 @@ COPY . .
 # Default command: run Django server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-COPY wait_for_db.py /app/wait_for_db.py
+RUN echo "import time, MySQLdb, sys\nwhile True:\n try:\n  MySQLdb.connect(host='db', user='root', passwd='root', db='car_rental').close(); print('DB ready'); break\n except Exception as e:\n  print('Waiting for DB...', e); time.sleep(5)" > /app/wait_for_db.py
