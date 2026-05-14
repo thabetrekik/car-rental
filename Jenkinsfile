@@ -45,7 +45,7 @@ pipeline {
                         -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
                         -Dsonar.sources=/usr/src \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=squ_3773c8416e0d828e5e43bcdb563f3c4ca01f3c69
+                        -Dsonar.login=squ_a243ba6f0ae1824e7bd5ef0a37c8148dbdbbc48a
                     """
                 }
             }
