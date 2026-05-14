@@ -33,26 +33,24 @@ pipeline {
             }
         }
 
-    stage('SonarQube Analysis') {
-        steps {
-            withSonarQubeEnv("${SONARQUBE_SERVER}") {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh """
-                        docker run --rm \
-                        --network car_rental_network \
-                        -v ${WORKSPACE}:/usr/src \
-                        sonarsource/sonar-scanner-cli:latest \
-                        -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                        -Dsonar.sources=/usr/src \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=squ_a243ba6f0ae1824e7bd5ef0a37c8148dbdbbc48a
-                    """
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        sh """
+                            docker run --rm \
+                              --network car_rental_network \
+                              -v ${WORKSPACE}:/usr/src \
+                              sonarsource/sonar-scanner-cli:latest \
+                              -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
+                              -Dsonar.sources=/usr/src \
+                              -Dsonar.host.url=http://sonarqube:9000 \   # ✅ use service name
+                              -Dsonar.login=squ_a243ba6f0ae1824e7bd5ef0a37c8148dbdbbc48a
+                        """
+                    }
                 }
             }
         }
-    }
-
-
 
         stage('OWASP ZAP Scan') {
             steps {
@@ -75,22 +73,21 @@ pipeline {
                 sh 'docker compose up -d web nginx'
             }
         }
+
         stage("Quality Gate") {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
+
         stage('Cleanup') {
             steps {
                 sh 'docker compose down || true'
             }
         }
-
-
     }
-
 
     post {
         always {
