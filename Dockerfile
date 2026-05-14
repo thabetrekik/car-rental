@@ -25,4 +25,4 @@ COPY . .
 # Default command: run Django server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-COPY scripts/wait_for_db.py /app/wait_for_db.py
+COPY wait_for_db.py /app/wait_for_db.py

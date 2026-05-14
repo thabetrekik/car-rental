@@ -34,7 +34,7 @@ services:
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin
     ports:
-      - "33010:3306"   # ✅ changed from 3307 to 3308
+      - "3310:3306"   
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
