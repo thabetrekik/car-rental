@@ -33,19 +33,22 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv("${SONARQUBE_SERVER}") {
-                    sh '''
-                        sonar-scanner \
-                        -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=squ_3773c8416e0d828e5e43bcdb563f3c4ca01f3c69
-                    '''
-                }
+    stage('SonarQube Analysis') {
+        steps {
+            withSonarQubeEnv('SonarQube') {
+                sh """
+                docker run --rm \
+                -v ${WORKSPACE}:/usr/src \
+                sonarsource/sonar-scanner-cli:latest \
+                -Dsonar.projectKey=car-rental \
+                -Dsonar.sources=/usr/src \
+                -Dsonar.host.url=http://sonarqube:9000 \
+                -Dsonar.login=squ_3773c8416e0d828e5e43bcdb563f3c4ca01f3c69
+                """
             }
         }
+    }
+
 
         stage('OWASP ZAP Scan') {
             steps {
