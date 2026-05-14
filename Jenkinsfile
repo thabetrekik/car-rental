@@ -39,7 +39,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     sh """
                         docker run --rm \
-                        --network car_rental_network \   # ✅ attach to same network
+                        --network car_rental_network \
                         -v ${WORKSPACE}:/usr/src \
                         sonarsource/sonar-scanner-cli:latest \
                         -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
