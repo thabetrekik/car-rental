@@ -44,7 +44,7 @@ pipeline {
                               sonarsource/sonar-scanner-cli:latest \
                               -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
                               -Dsonar.sources=/usr/src \
-                              -Dsonar.host.url=http://sonarqube:9000 \ 
+                              -Dsonar.host.url=http://sonarqube:9000  \ 
                               -Dsonar.login=squ_a243ba6f0ae1824e7bd5ef0a37c8148dbdbbc48a
                         """
                     }
