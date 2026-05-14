@@ -1,3 +1,4 @@
+name: car_rental_pipeline
 services:
 
   web:
