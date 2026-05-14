@@ -74,7 +74,13 @@ pipeline {
                 waitForQualityGate abortPipeline: true
                 }
             }
-}
+        }
+        stage('Cleanup') {
+            steps {
+                sh 'docker compose down || true'
+            }
+        }
+
 
     }
 

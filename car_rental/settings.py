@@ -76,8 +76,8 @@ DATABASES = {
         'NAME': os.getenv('MYSQL_DATABASE', 'car_rental'),
         'USER': os.getenv('MYSQL_USER', 'admin'),
         'PASSWORD': os.getenv('MYSQL_PASSWORD', 'admin'),
-        'HOST': MYSQL_HOST,
-        'PORT': MYSQL_PORT,
+        'HOST': 'db',
+        'PORT': '3306',
     }
 }
 # Password validation
