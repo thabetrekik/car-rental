@@ -4,12 +4,10 @@ pipeline {
     environment {
         GITHUB_REPO = "https://github.com/thabetrekik/car-rental.git"
         SONARQUBE_SERVER = "SonarQube"
-        // Changed to match existing project, or use a unique key
-        SONARQUBE_PROJECT_KEY = "Car-Rental"
+        SONARQUBE_PROJECT_KEY = "Car-Rental"   // or "car-rental" if you deleted the old one
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 git url: "${GITHUB_REPO}", credentialsId: 'github-token', branch: 'main'
@@ -53,7 +51,6 @@ pipeline {
             }
         }
 
-        // MOVED: Quality Gate must run BEFORE Deploy
         stage("Quality Gate") {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
