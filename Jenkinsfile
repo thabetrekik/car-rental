@@ -43,13 +43,14 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONARQUBE_SERVER}") {
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                        sh """
+                        // Use single quotes and shell variable to prevent Groovy interpolation warning
+                        sh '''
                             sonar-scanner \
-                              -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
+                              -Dsonar.projectKey=$SONARQUBE_PROJECT_KEY \
                               -Dsonar.sources=. \
                               -Dsonar.host.url=http://sonarqube:9000 \
-                              -Dsonar.login=${SONAR_TOKEN}
-                        """
+                              -Dsonar.login=$SONAR_TOKEN
+                        '''
                     }
                 }
             }
@@ -66,8 +67,8 @@ pipeline {
         stage('OWASP ZAP Scan') {
             steps {
                 sh '''
-                    docker run --rm -v $(pwd):/zap/wrk \
-                    owasp/zap2docker-stable zap-baseline.py \
+                    docker run --rm -v $(pwd):/zap/wrk:rw \
+                    zaproxy/zap-stable zap-baseline.py \
                     -t http://web:8000 -r zap_report.html
                 '''
             }

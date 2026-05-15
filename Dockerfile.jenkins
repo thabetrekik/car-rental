@@ -7,7 +7,7 @@ RUN apt-get update && \
     apt-get install -y docker.io docker-compose && \
     apt-get clean
 
-# Install SonarQube Scanner CLI
+# Install SonarQube Scanner
 RUN apt-get update && \
     apt-get install -y wget unzip && \
     wget -q https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip && \
@@ -16,6 +16,11 @@ RUN apt-get update && \
     rm sonar-scanner-cli-5.0.1.3006-linux.zip && \
     apt-get remove -y wget unzip && \
     apt-get autoremove -y && \
+    apt-get clean
+
+# Install Node.js (for SonarQube JS/CSS analysis)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
     apt-get clean
 
 USER jenkins
