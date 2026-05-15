@@ -69,7 +69,7 @@ pipeline {
                 sh '''
                     docker run --rm -v $(pwd):/zap/wrk:rw \
                     zaproxy/zap-stable zap-baseline.py \
-                    -t http://web:8000 -r zap_report.html
+                    -t http://127.0.0.1:8000/ -r zap_report.html
                 '''
             }
         }
