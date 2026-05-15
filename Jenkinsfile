@@ -4,10 +4,11 @@ pipeline {
     environment {
         GITHUB_REPO = "https://github.com/thabetrekik/car-rental.git"
         SONARQUBE_SERVER = "SonarQube"
-        SONARQUBE_PROJECT_KEY = "Car-Rental"   // or "car-rental" if you deleted the old one
+        SONARQUBE_PROJECT_KEY = "Car-Rental"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git url: "${GITHUB_REPO}", credentialsId: 'github-token', branch: 'main'
@@ -32,6 +33,12 @@ pipeline {
             }
         }
 
+        stage('Run Tests') {
+            steps {
+                sh 'docker compose run --rm web python manage.py test'
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_SERVER}") {
@@ -40,11 +47,13 @@ pipeline {
                             docker run --rm \
                               --network car_rental_network \
                               -v ${WORKSPACE}:/usr/src \
+                              -w /usr/src \
                               sonarsource/sonar-scanner-cli:5.0 \
                               -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                              -Dsonar.sources=/usr/src \
+                              -Dsonar.sources=. \
                               -Dsonar.host.url=http://sonarqube:9000 \
-                              -Dsonar.login=\${SONAR_TOKEN}
+                              -Dsonar.login=\${SONAR_TOKEN} \
+                              -Dsonar.working.directory=.scannerwork
                         """
                     }
                 }
@@ -56,12 +65,6 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh 'docker compose run --rm web python manage.py test'
             }
         }
 
