@@ -43,18 +43,22 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONARQUBE_SERVER}") {
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                        sh """
+                        sh '''
+                            mkdir -p ${WORKSPACE}/.scannerwork
+                            chmod 777 ${WORKSPACE}/.scannerwork
+                            
                             docker run --rm \
                               --network car_rental_network \
                               -v ${WORKSPACE}:/usr/src \
                               -w /usr/src \
+                              --user $(id -u):$(id -g) \
                               sonarsource/sonar-scanner-cli:5.0 \
                               -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
                               -Dsonar.sources=. \
                               -Dsonar.host.url=http://sonarqube:9000 \
-                              -Dsonar.login=\${SONAR_TOKEN} \
+                              -Dsonar.login=${SONAR_TOKEN} \
                               -Dsonar.working.directory=.scannerwork
-                        """
+                        '''
                     }
                 }
             }
