@@ -59,61 +59,66 @@ pipeline {
         stage("Quality Gate") {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
-                    // Set to false to not block deployment while fixing issues
                     waitForQualityGate abortPipeline: false
                 }
             }
         }
 
-        // Start ALL services for ZAP (nginx + web)
-        stage('Start Services for ZAP') {
-            when {
-                branch 'main'
-            }
+        // Start web + nginx for ZAP and Deploy
+        stage('Start Services') {
             steps {
+                // Create nginx config if it doesn't exist
+                sh '''
+                    mkdir -p nginx
+                    if [ ! -f nginx/default.conf ]; then
+                        cat > nginx/default.conf << 'EOF'
+server {
+    listen 80;
+    server_name localhost;
+
+    location / {
+        proxy_pass http://web:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+                    fi
+                '''
                 sh 'docker compose up -d web nginx'
                 sh '''
-                    echo "Waiting for nginx to be ready..."
+                    echo "Waiting for services to be ready..."
                     for i in $(seq 1 30); do
-                        docker run --rm --network car_rental_network curlimages/curl:8.5.0 -s -o /dev/null -w "%{http_code}" http://nginx:80 | grep -qE "200|302|401|403" && break
-                        echo "Attempt $i: nginx not ready yet..."
+                        curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000 | grep -qE "200|302|401|403" && break
+                        echo "Attempt $i: not ready yet..."
                         sleep 2
                     done
-                    echo "Nginx is ready!"
+                    echo "Ready!"
                 '''
             }
         }
 
         stage('OWASP ZAP Scan') {
-            when {
-                branch 'main'
-            }
             steps {
                 sh '''
-                    # Create temp dir with proper permissions
                     ZAP_TMP=$(mktemp -d)
                     chmod 777 $ZAP_TMP
                     
-                    echo "Running ZAP scan against http://nginx:80..."
+                    echo "Running ZAP scan against http://127.0.0.1:8000..."
                     
                     docker run --rm \
-                      --network car_rental_network \
+                      --network host \
                       -v $ZAP_TMP:/zap/wrk:rw \
                       zaproxy/zap-stable zap-baseline.py \
-                      -t http://nginx:80 \
+                      -t http://127.0.0.1:8000 \
                       -r zap_report.html \
                       -I
                     
-                    # Copy report to workspace
                     cp $ZAP_TMP/zap_report.html ${WORKSPACE}/zap_report.html || echo "No report generated"
                     rm -rf $ZAP_TMP
                 '''
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                sh 'docker compose up -d web nginx'
             }
         }
 
