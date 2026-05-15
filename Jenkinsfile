@@ -41,24 +41,27 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh """
-                        docker run --rm \
-                          --network car_rental_network \
-                          -v ${WORKSPACE}:/usr/src \
-                          -w /usr/src \
-                          sonarsource/sonar-scanner-cli:5.0 \
-                          -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=http://sonarqube:9000 \
-                          -Dsonar.login=${SONAR_TOKEN}
-                    """
+                withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        sh """
+                            sonar-scanner \
+                              -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
+                              -Dsonar.sources=. \
+                              -Dsonar.host.url=http://sonarqube:9000 \
+                              -Dsonar.login=${SONAR_TOKEN}
+                        """
+                    }
                 }
             }
         }
 
-        // REMOVED: waitForQualityGate - it doesn't work with Docker-based scanner
-        // Instead, the SonarQube webhook will notify Jenkins of results
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
 
         stage('OWASP ZAP Scan') {
             steps {
