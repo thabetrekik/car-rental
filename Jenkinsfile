@@ -64,14 +64,19 @@ pipeline {
             }
         }
 
-        // Start web + nginx for ZAP and Deploy
+        // Start web + nginx for ZAP and keep running
         stage('Start Services') {
             steps {
-                // Create nginx config if it doesn't exist
+                // Clean up any bad nginx config and create fresh
                 sh '''
+                    # Remove if it's a directory (from previous failed runs)
+                    if [ -d nginx/default.conf ]; then
+                        rm -rf nginx/default.conf
+                    fi
+                    
+                    # Create the nginx directory and config file
                     mkdir -p nginx
-                    if [ ! -f nginx/default.conf ]; then
-                        cat > nginx/default.conf << 'EOF'
+                    cat > nginx/default.conf << 'EOF'
 server {
     listen 80;
     server_name localhost;
@@ -85,11 +90,17 @@ server {
     }
 }
 EOF
-                    fi
+                    
+                    # Verify it's a file, not directory
+                    ls -la nginx/default.conf
                 '''
+                
+                // Start services
                 sh 'docker compose up -d web nginx'
+                
+                // Wait for nginx to be ready
                 sh '''
-                    echo "Waiting for services to be ready..."
+                    echo "Waiting for http://127.0.0.1:8000..."
                     for i in $(seq 1 30); do
                         curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000 | grep -qE "200|302|401|403" && break
                         echo "Attempt $i: not ready yet..."
