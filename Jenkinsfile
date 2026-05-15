@@ -3,8 +3,9 @@ pipeline {
 
     environment {
         GITHUB_REPO = "https://github.com/thabetrekik/car-rental.git"
-        SONARQUBE_SERVER = "SonarQube"   // Jenkins SonarQube server name
-        SONARQUBE_PROJECT_KEY = "car-rental"
+        SONARQUBE_SERVER = "SonarQube"
+        // Changed to match existing project, or use a unique key
+        SONARQUBE_PROJECT_KEY = "Car-Rental"
     }
 
     stages {
@@ -45,11 +46,25 @@ pipeline {
                               -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
                               -Dsonar.sources=/usr/src \
                               -Dsonar.host.url=http://sonarqube:9000 \
-                              -Dsonar.login=squ_8cc735936ac6ec312db43349cbcbc8378552bdd8
-
+                              -Dsonar.login=\${SONAR_TOKEN}
                         """
                     }
                 }
+            }
+        }
+
+        // MOVED: Quality Gate must run BEFORE Deploy
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'docker compose run --rm web python manage.py test'
             }
         }
 
@@ -63,23 +78,9 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                sh 'docker compose run --rm web python manage.py test'
-            }
-        }
-
         stage('Deploy') {
             steps {
                 sh 'docker compose up -d web nginx'
-            }
-        }
-
-        stage("Quality Gate") {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
             }
         }
 
