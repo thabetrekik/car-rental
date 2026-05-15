@@ -64,41 +64,9 @@ pipeline {
             }
         }
 
-        // Start web + nginx for ZAP and keep running
         stage('Start Services') {
             steps {
-                // Clean up any bad nginx config and create fresh
-                sh '''
-                    # Remove if it's a directory (from previous failed runs)
-                    if [ -d nginx/default.conf ]; then
-                        rm -rf nginx/default.conf
-                    fi
-                    
-                    # Create the nginx directory and config file
-                    mkdir -p nginx
-                    cat > nginx/default.conf << 'EOF'
-server {
-    listen 80;
-    server_name localhost;
-
-    location / {
-        proxy_pass http://web:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-EOF
-                    
-                    # Verify it's a file, not directory
-                    ls -la nginx/default.conf
-                '''
-                
-                // Start services
                 sh 'docker compose up -d web nginx'
-                
-                // Wait for nginx to be ready
                 sh '''
                     echo "Waiting for http://127.0.0.1:8000..."
                     for i in $(seq 1 30); do
@@ -119,9 +87,11 @@ EOF
                     
                     echo "Running ZAP scan against http://127.0.0.1:8000..."
                     
+                    # Run ZAP as root to avoid permission issues
                     docker run --rm \
                       --network host \
                       -v $ZAP_TMP:/zap/wrk:rw \
+                      --user root \
                       zaproxy/zap-stable zap-baseline.py \
                       -t http://127.0.0.1:8000 \
                       -r zap_report.html \
@@ -133,9 +103,14 @@ EOF
             }
         }
 
+        // Only stop web and nginx, NOT the entire stack
         stage('Cleanup') {
             steps {
-                sh 'docker compose down || true'
+                sh '''
+                    echo "Stopping web and nginx only..."
+                    docker compose stop web nginx || true
+                    docker compose rm -f web nginx || true
+                '''
             }
         }
     }
