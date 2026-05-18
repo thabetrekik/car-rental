@@ -18,7 +18,7 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         "DJANGO_CSRF_TRUSTED_ORIGINS",
-        "http://127.0.0.1:8000,http://localhost:8000,http://host.docker.internal:8000",
+        "http://127.0.0.1:8000,http://localhost:8000,http://host.docker.internal:8000,http://127.0.0.1:8001,http://localhost:8001,http://host.docker.internal:8001",
     ).split(",")
     if origin.strip()
 ]
@@ -76,8 +76,8 @@ DATABASES = {
         'NAME': os.getenv('MYSQL_DATABASE', 'car_rental'),
         'USER': os.getenv('MYSQL_USER', 'admin'),
         'PASSWORD': os.getenv('MYSQL_PASSWORD', 'admin'),
-        'HOST': 'db',
-        'PORT': '3306',
+        'HOST': MYSQL_HOST,
+        'PORT': MYSQL_PORT,
     }
 }
 # Password validation
